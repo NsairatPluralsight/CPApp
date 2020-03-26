@@ -1,0 +1,22 @@
+<section [hidden]='!showMenu' style="width: 250px;">
+  <div class="user-name">
+    <button class="user-counter-button" mat-button [matMenuTriggerFor]="menu">
+      <div class="user-image center-col">
+        <button mat-mini-fab class="user-icon">
+          <object class="center-small-icon" data="ComponentPortal/assets/images/user.svg"></object>
+        </button>
+      </div>
+      <div class="hidden-sm hidden-xs hidden-mob display-inline">
+        <span class="user-counter-text">{{userName}}</span>
+      </div>
+    </button>
+    <mat-menu #menu="matMenu">
+      <a class="dropdown-content-text" id="logout" (click)="logout(false)" mat-list-item>
+        {{logoutCaption}}
+      </a>
+      <a class="dropdown-content-text" id="loginDifferentUser" (click)="logout(true)" mat-list-item>
+        {{differentUser}}
+      </a>
+    </mat-menu>
+  </div>
+</section>

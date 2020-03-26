@@ -1,0 +1,12 @@
+<div [dir]="languageDirection">
+  <h1 mat-dialog-title> {{title}} </h1>
+  <mat-dialog-content>
+    <h3 class="sub-header">{{subTitle}}</h3>
+    <p>{{message}}</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-raised-button [mat-dialog-close]="false" color='warn' >{{cancelText}}</button>
+    <button mat-raised-button [mat-dialog-close]="true" color='primary' cdkFocusInitial>{{yesText}}</button>
+  </mat-dialog-actions>
+</div>
+

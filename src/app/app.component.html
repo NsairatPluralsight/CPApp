@@ -1,0 +1,14 @@
+<div fxLayout="row" [dir]="direction">
+  <mat-toolbar fxLayout="row" color="primary">
+    <section class='main-toolbar'>
+      <section class='title'><a href="#">{{title}}</a></section>
+      <app-user-menu class='user-menu'></app-user-menu>
+    </section>
+  </mat-toolbar>
+  <router-outlet></router-outlet>
+  <div class='container' [ngClass]='{"show": showConnecting, "hide": !showConnecting}'>
+    <div class="loading">
+      {{connectingCaption}}<span class="dot">.</span><span class="dot dot-2">.</span><span class="dot dot-3">.</span>
+    </div>
+  </div>
+</div>

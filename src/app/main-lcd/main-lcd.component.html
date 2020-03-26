@@ -1,0 +1,186 @@
+<div [hidden]='!mainLCDConfiguration && !isReady' [dir]="languageDirection">
+  <mat-card>
+    <mat-card-header class="main-card-header">
+    </mat-card-header>
+    <mat-card-content>
+      <form novalidate [formGroup]='mainLCDForm' (ngSubmit)="saveSettings()">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title class="main-title">{{generalInfoCaption}}</mat-card-title>
+            <div class='identify' (click)="identify()"><button mat-raised-button type="button" color="primary"> {{identifyCaption}} </button></div>
+          </mat-card-header>
+          <mat-card-content>
+            <section *ngIf='mainLCD'>
+              <div class="label-group-container">
+                <div class="label-container"><mat-label class="header-label">{{name}}</mat-label></div>
+                <div class="label-container"><mat-label>{{mainLCDService.mainLCD['name_L'+ languageIndex ]}}</mat-label></div>
+              </div>
+              <div class="label-group-container">
+                <div class="label-container"><mat-label class="header-label">{{branchCaption}}</mat-label></div>
+                <div class="label-container"><mat-label>{{branchName}}</mat-label></div>
+              </div>
+              <div class="label-group-container">
+                <div class="label-container"><mat-label class="header-label">{{ipAddress}}</mat-label></div>
+                <div class="label-container"><mat-label>{{mainLCDService.mainLCD.address}}</mat-label></div>
+              </div>
+              <div class="label-group-container">
+                <div class="label-container"><mat-label class="header-label">{{typeCaption}}</mat-label></div>
+                <div class="label-container"><mat-label>{{mainLCDService.mainLCD.typeName}}</mat-label></div>
+              </div>
+              <div class="label-group-container">
+                <div class="label-container"><mat-label class="header-label">{{identity}}</mat-label></div>
+                <div class="label-container"><mat-label>{{mainLCDService.mainLCD.identity}}</mat-label></div>
+              </div>
+            </section>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>{{counterAllocation}}</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <section>
+              <div class="drop-down-container" [hidden]='!mainLCDForm'>
+                <mat-radio-group formControlName="countersValue">
+                  <mat-radio-button color="primary" [value]="0">
+                    <span> {{displayAllOption}} </span></mat-radio-button>
+                  <mat-radio-button color="primary" [value]="1">
+                    <span>{{customizeCounters}}</span>
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+            </section>
+
+            <section>
+              <section [hidden]='!counterOption || disabled' class="mat-table-container">
+                <mat-table [dataSource]="dataSource" matSort>
+                  <!-- Assigned Column -->
+                  <ng-container matColumnDef="assigned">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header> {{assigned}} </mat-header-cell>
+                    <mat-cell *matCellDef="let element">
+                      <mat-checkbox color="primary" [checked]="element.assigned" (change)="element.assigned = !element.assigned"
+                        class="example-margin"></mat-checkbox>
+                    </mat-cell>
+                  </ng-container>
+
+                  <!-- Name Column -->
+                  <ng-container matColumnDef="name_L1">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header> {{name}} </mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element['name_L'+ languageIndex ]}} </mat-cell>
+                  </ng-container>
+
+                  <!-- Number Column -->
+                  <ng-container matColumnDef="number">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header> {{number}} </mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.number}} </mat-cell>
+                  </ng-container>
+
+                  <!-- Direction Identity Column -->
+                  <ng-container matColumnDef="direction">
+                    <mat-header-cell *matHeaderCellDef mat-sort-header> {{direction}} </mat-header-cell>
+                    <mat-cell *matCellDef="let element">
+                      <button type="button" mat-stroked-button [(disabled)]='!element.assigned' (click)='openDirectionsDialog(element.id)'>
+                        <mat-icon> {{directionArray[element.direction]}}</mat-icon>
+                      </button>
+                    </mat-cell>
+                  </ng-container>
+
+                  <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+                  <mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></mat-row>
+                </mat-table>
+                <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+              </section>
+
+            </section>
+
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>{{cDisplayMode}}</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content>
+            <section>
+              <section class="drop-down-container" *ngIf='mainLCDForm'>
+                <mat-select placeholder="Queueing info display mode" formControlName='playerMode' class="drop-down-width">
+                  <mat-option color="primary" [value]="0">{{currentCustomer}}</mat-option>
+                  <mat-option color="primary" [value]="1">{{withWaitingCaption}}</mat-option>
+                </mat-select>
+              </section>
+
+              <section *ngIf='displayMode == 0'>
+                <section class="example-section">
+                  <mat-checkbox color="primary" [checked]="enablePaging" (change)="enablePaging = !enablePaging" class="example-margin primary"
+                    (click)='togglePaging(enablePaging)'> {{enablePagingCaption}} </mat-checkbox>
+
+                  <section class='form-container'>
+                    <div>
+                      <mat-form-field>
+                        <input matInput type="number" placeholder='{{timeToWait}}' formControlName="waiteTime">
+                        <mat-error *ngIf='mainLCDForm.get("waiteTime")?.errors?.range'>Min time: 5 & Max time: 300
+                        </mat-error>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <input matInput type="number" placeholder='{{displayDuration}}' formControlName="pageDuration">
+                        <mat-error *ngIf='mainLCDForm.get("pageDuration")?.errors?.range'>Min time: 5 & Max time: 300
+                        </mat-error>
+                      </mat-form-field>
+                    </div>
+                  </section>
+                </section>
+              </section>
+
+              <section [hidden]='displayMode == 0'>
+
+                <section>
+                  <div class="drop-down-container" *ngIf='mainLCDForm'>
+                    <mat-radio-group formControlName="servicesValue">
+                      <mat-radio-button color="primary" [value]="true">{{allServices}}</mat-radio-button>
+                      <mat-radio-button color="primary" [value]="false">{{customizeServices}}</mat-radio-button>
+                    </mat-radio-group>
+                  </div>
+                </section>
+
+                <section>
+                  <section [hidden]='allServicesSelected || disabled' class="mat-table-container">
+                    <mat-table [dataSource]="dataSourceService" matSort>
+                      <!-- Assigned Column -->
+                      <ng-container matColumnDef="assigned">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> {{assigned}} </mat-header-cell>
+                        <mat-cell *matCellDef="let element">
+                          <mat-checkbox color="primary" [checked]="element.assigned" (change)="element.assigned = !element.assigned"
+                            class="example-margin"></mat-checkbox>
+                        </mat-cell>
+                      </ng-container>
+
+                      <!-- Name Column -->
+                      <ng-container matColumnDef="nameL1">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header> {{name}} </mat-header-cell>
+                        <mat-cell *matCellDef="let element"> {{element['nameL'+ languageIndex ]}} </mat-cell>
+                      </ng-container>
+
+                      <mat-header-row *matHeaderRowDef="displayedSeriveColumns; sticky: true"></mat-header-row>
+                      <mat-row *matRowDef="let row; columns: displayedSeriveColumns;" class="table-row"></mat-row>
+                    </mat-table>
+                    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+                  </section>
+                </section>
+              </section>
+            </section>
+          </mat-card-content>
+        </mat-card>
+
+        <div class='submitButton'>
+            <button mat-raised-button type="submit" color="primary" [disabled]="!canEdit || disabled || (!mainLCDForm.valid && displayMode == 0)">{{save}}</button>
+            <button mat-raised-button type="button" color="primary" routerLink="/devices">{{cancel}}</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+</div>
+ <app-spinner [isVisible]='!mainLCDConfiguration || !isReady'></app-spinner>

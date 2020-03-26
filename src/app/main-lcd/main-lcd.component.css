@@ -1,0 +1,107 @@
+mat-table {
+  width: 100%;
+  max-height: 300px;
+  min-height: 300px;
+  overflow: auto;
+}
+
+mat-card {
+  margin-top: 20px;
+}
+
+.drop-down-container{
+  width: 50%;
+}
+
+section{
+  margin: 20px;
+}
+
+.form-container, mat-radio-group {
+  max-width: 50%;
+}
+
+mat-form-field, mat-radio-button {
+  width: 100%;
+  margin: 10px;
+}
+
+.submitButton {
+  margin-top: 10px;
+}
+
+.identify {
+  width: 50%;
+  display: inline-block;
+  text-align: right;
+}
+
+.card-title {
+  display: flex;
+}
+
+.main-title {
+  width: 50%;
+}
+
+::ng-deep .mat-card-header-text {
+  width: 100%;
+}
+
+.spinner-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 101;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hide {
+  display: none;
+}
+
+.submitButton > button {
+  width: 75px;
+  margin: 5px;
+}
+
+.mat-table-container {
+  border: 1px solid #ddd;
+}
+.drop-down-width {
+  width: 150px;
+}
+
+[dir="rtl"] .identify {
+  text-align: left;
+}
+
+.header-label {
+  font-family: Lato-Light;
+  font-weight: bold;
+  font-size: 14px;
+  color: #212121;
+}
+
+.label-group-container {
+  width: 100%;
+  display: flex;
+  padding: 5px;
+}
+
+.label-container  {
+  width: 70px;
+}
+
+.submitButton {
+  text-align: right;
+}
+
+[dir="rtl"] .submitButton {
+  text-align: left;
+}
