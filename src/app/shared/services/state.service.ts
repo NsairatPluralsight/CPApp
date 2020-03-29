@@ -11,22 +11,22 @@ export class StateService {
   constructor(private logger: LoggerService, private eventsService: EventsService) { }
 
   /**
-  * @summary - sets the status of the app
-  * @param {Status} value - The status value.
-  */
-  setStatus(value: InternalStatus, errorType?: ErrorType): void {
+   * @summary - sets the status of the app
+   * @param {Status} value - The status value.
+   */
+  public setStatus(pValue: InternalStatus, pErrorType?: ErrorType): void {
     try {
-      this.status = value;
-      this.eventsService.statusUpdate.emit(value);
+      this.status = pValue;
+      this.eventsService.statusUpdate.emit(pValue);
     } catch (error) {
       this.logger.error(error);
     }
   }
 
   /**
-  * @return {Status} return Status enum that represents the App status.
-  */
-  getStatus(): InternalStatus {
+   * @return {Status} return Status enum that represents the App status.
+   */
+  public getStatus(): InternalStatus {
     try {
       return this.status;
     } catch (error) {

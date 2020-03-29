@@ -7,21 +7,21 @@ import { MultilingualService } from '../shared/services/multilingual.service';
 @Component({
   selector: 'app-direction',
   templateUrl: './direction.component.html',
-  styleUrls: ['./direction.component.css']
+  styleUrls: ['./direction.component.css'],
 })
 export class DirectionComponent {
-  title: string;
+  public title: string;
   constructor(private logger: LoggerService, private languageService: MultilingualService, public dialogRef: MatDialogRef<DirectionComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any) {
+              @Inject(MAT_DIALOG_DATA) public data: any) {
       this.loadCaptions();
     }
 
-  close(value: number) {
+  public close(value: number) {
     this.data[Constants.cDIRECTION] = value;
     this.dialogRef.close(this.data);
   }
 
-  loadCaptions(): void {
+  public loadCaptions(): void {
     try {
       this.title = this.languageService.getCaption(Constants.cDIRECTION_DIALOG_TITLE);
     } catch (error) {

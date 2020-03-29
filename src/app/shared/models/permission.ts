@@ -1,9 +1,9 @@
 export class Permission {
-  create: boolean;
-  read: boolean;
-  edit: boolean;
-  delete: boolean;
-  report: boolean;
+  public create: boolean;
+  public read: boolean;
+  public edit: boolean;
+  public delete: boolean;
+  public report: boolean;
 
   constructor(pCreate: boolean, pRead: boolean, pEdit: boolean, pDelete: boolean, pReport: boolean) {
     this.create = pCreate;
@@ -13,4 +13,3 @@ export class Permission {
     this.report = pReport;
   }
 }
-

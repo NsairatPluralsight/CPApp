@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { CommunicationService } from './communication.service';
 import { LoggerService } from './logger.service';
-import { RequestPayload, ResponsePayload, ServerPayload } from '../models/payload';
+import { ResponsePayload } from '../models/response-payload';
 import { Message } from '../models/message';
 import { Result, Direction } from '../models/enum';
 import { Counter } from '../models/counter';
 import { Branch } from '../models/branch';
 import { CVMComponent } from '../models/cvm-component';
 import { Service } from '../models/service';
-import { keyValue } from '../models/key-value';
+import { KeyValue } from '../models/key-value';
 import { Language } from '../models/language';
 import { CVMComponentType } from '../models/cvm-component-type';
 import { Filter } from '../models/filter';
@@ -16,40 +16,42 @@ import { CacheService } from './cache.service';
 import { EventsService } from './events.service';
 import { Constants } from '../models/constants';
 import { Permission } from '../models/permission';
+import { ServerPayload } from '../models/server-payload';
+import { RequestPayload } from '../models/request-payload';
 
 @Injectable()
 export class CommunicationManagerService {
 
   constructor(private communicationService: CommunicationService, private logger: LoggerService,
-    private cache: CacheService, private events: EventsService) { }
+              private cache: CacheService, private events: EventsService) { }
 
   /**
-  * @async
-  * @summary - get user permetion for component
-  */
-  async getUserPermission() {
+   * @async
+   * @summary - get user permetion for component
+   */
+  public async getUserPermission() {
     try {
-      let payload = this.getServerPayload(`${Constants.cCOMPONENT}.${Constants.cGET_USER_PERMISSION}`, null);
-      let permission: Permission;
+      const tPayload = this.getServerPayload(`${Constants.cCOMPONENT}.${Constants.cGET_USER_PERMISSION}`, null);
+      let tPermission: Permission;
 
       await this.communicationService
-        .post(payload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_USER_PERMISSION}`)
+        .post(tPayload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_USER_PERMISSION}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
+            const tResponsePayload = data.payload as ResponsePayload;
 
-            if (responsePayload.result == Result.Success) {
-              let object = responsePayload.data[0];
-              permission = new Permission(object[Constants.cCREATE], object[Constants.cREAD], object[Constants.cEDIT],
-                 object[Constants.cDELETE], object[Constants.cREPORT]);
+            if (tResponsePayload.result === Result.Success) {
+              const tObject = tResponsePayload.data[0];
+              tPermission = new Permission(tObject[Constants.cCREATE], tObject[Constants.cREAD], tObject[Constants.cEDIT],
+                tObject[Constants.cDELETE], tObject[Constants.cREPORT]);
             } else {
-              permission = null;
+              tPermission = null;
             }
           } else {
-            permission = null;
+            tPermission = null;
           }
         });
-      return permission;
+      return tPermission;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -57,40 +59,40 @@ export class CommunicationManagerService {
   }
 
   /**
-  * @async
-  * @summary - returns all the branches that belongs to an organization
-  * @returns {Promise<Branch[]>} - array of objects of type Branch wrapped in a promise.
-  */
-  async getBranches(): Promise<Branch[]> {
+   * @async
+   * @summary - returns all the branches that belongs to an organization
+   * @returns {Promise<Branch[]>} - array of objects of type Branch wrapped in a promise.
+   */
+  public async getBranches(): Promise<Branch[]> {
     try {
-      let filtersArray = [];
-      let filter = new keyValue(Constants.cOrg_ID, '1');
-      filtersArray.push(filter);
+      const tFiltersArray = [];
+      const tFilter = new KeyValue(Constants.cOrg_ID, '1');
+      tFiltersArray.push(tFilter);
 
-      let readEntitiesParams = [JSON.stringify(filtersArray), this.cache.getCurrentLanguage().id];
-      let payload = this.getServerPayload(Constants.cQUEUE_BRANCH_GET_ENTITIES_NAMES, readEntitiesParams);
-      let branches = new Array<Branch>();
+      const tReadEntitiesParams = [JSON.stringify(tFiltersArray), this.cache.getCurrentLanguage().id];
+      const tPayload = this.getServerPayload(Constants.cQUEUE_BRANCH_GET_ENTITIES_NAMES, tReadEntitiesParams);
+      let tBranches = new Array<Branch>();
       await this.communicationService
-        .post(payload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_BRANCHES}`)
+        .post(tPayload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_BRANCHES}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
+            const tResponsePayload = data.payload as ResponsePayload;
 
-            if (responsePayload.result == Result.Success) {
-              branches = responsePayload.data[0].map(b => {
+            if (tResponsePayload.result === Result.Success) {
+              tBranches = tResponsePayload.data[0].map((b) => {
                 return (new Branch(b[Constants.cID], b[Constants.cNAME_UCC]));
               });
-            } else if (responsePayload.result == -3) {
+            } else if (tResponsePayload.result === -3) {
               this.events.unAuthorizedAction.emit(Constants.cBRANCHE);
-              branches = null;
+              tBranches = null;
             } else {
-              branches = null;
+              tBranches = null;
             }
           } else {
-            branches = null;
+            tBranches = null;
           }
         });
-      return branches;
+      return tBranches;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -108,29 +110,29 @@ export class CommunicationManagerService {
    * @param {Filter} filter - object that contains the text to search for and columns name to search in
    * @returns {Promise<CVMComponent[]>} - array of objects of type CVMComponent wrapped in a promise.
    */
-  async getComponent(branchID: number, typeName?: string, deviceID?: number, pageNumber?: number, orderBy?: string, filter?: Filter): Promise<CVMComponent[]> {
+  public async getComponent(pBranchID: number, pTypeName?: string, pDeviceID?: number, pPageNumber?: number, pOrderBy?: string, pFilter?: Filter): Promise<CVMComponent[]> {
     try {
-      let payload = this.getRequestPayload(branchID, typeName, deviceID, null, pageNumber, orderBy, filter);
-      let components = new Array<CVMComponent>();
+      const tPayload = this.getRequestPayload(pBranchID, pTypeName, pDeviceID, null, pPageNumber, pOrderBy, pFilter);
+      let tComponents = new Array<CVMComponent>();
       await this.communicationService
-        .post(payload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_GET_COMPONENT}`)
+        .post(tPayload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_GET_COMPONENT}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
-            if (responsePayload.result == Result.Success) {
-              components = <CVMComponent[]>JSON.parse(responsePayload.data);
-              components.map((device) => {
+            const tResponsePayload = data.payload as ResponsePayload;
+            if (tResponsePayload.result === Result.Success) {
+              tComponents = JSON.parse(tResponsePayload.data) as CVMComponent[];
+              tComponents.map((device) => {
                 if (device.configuration) { device.configuration = JSON.parse(device.configuration); }
                 if (device.reportedData) { device.reportedData = JSON.parse(device.reportedData); }
-              })
+              });
             } else {
-              components = null;
+              tComponents = null;
             }
           } else {
-            components = null;
+            tComponents = null;
           }
         });
-      return components;
+      return tComponents;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -138,32 +140,32 @@ export class CommunicationManagerService {
   }
 
   /**
-  * @async
-  * @summary - returns Components Count  accourding to paramters
-  * @param {number} branchID -the branch ID
-  * @param {string} typeName - the component Type
-  * @returns {Promise<number>} - number wrapped in a promise.
-  */
-  async getComponentsCount(branchID: number, typeName?: string): Promise<number> {
+   * @async
+   * @summary - returns Components Count  accourding to paramters
+   * @param {number} branchID -the branch ID
+   * @param {string} typeName - the component Type
+   * @returns {Promise<number>} - number wrapped in a promise.
+   */
+  public async getComponentsCount(pBranchID: number, pTypeName?: string): Promise<number> {
     try {
-      let payload = this.getRequestPayload(branchID, typeName);
-      let count = 0;
+      const tPayload = this.getRequestPayload(pBranchID, pTypeName);
+      let tCount = 0;
       await this.communicationService
-        .post(payload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_GET_COMPONENTS_COUNT}`)
+        .post(tPayload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_GET_COMPONENTS_COUNT}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
-            if (responsePayload.result == Result.Success) {
-              let object = JSON.parse(responsePayload.data)[0];
-              count = object[Constants.cCount];
+            const tResponsePayload = data.payload as ResponsePayload;
+            if (tResponsePayload.result === Result.Success) {
+              const tObject = JSON.parse(tResponsePayload.data)[0];
+              tCount = tObject[Constants.cCount];
             } else {
-              count = null;
+              tCount = null;
             }
           } else {
-            count = null;
+            tCount = null;
           }
         });
-      return count;
+      return tCount;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -171,29 +173,29 @@ export class CommunicationManagerService {
   }
 
   /**
-  * @async
-  * @summary - returns Component types
-  * @returns {Promise<CVMComponentType[]>} - array of objects of type CVMComponentType wrapped in a promise.
-  */
-  async getComponentTypes(): Promise<CVMComponentType[]> {
+   * @async
+   * @summary - returns Component types
+   * @returns {Promise<CVMComponentType[]>} - array of objects of type CVMComponentType wrapped in a promise.
+   */
+  public async getComponentTypes(): Promise<CVMComponentType[]> {
     try {
-      let payload = this.getRequestPayload();
-      let componentTypes = new Array<CVMComponentType>();
+      const tPayload = this.getRequestPayload();
+      let tComponentTypes = new Array<CVMComponentType>();
       await this.communicationService
-        .post(payload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_GET_COMPONENT_TYPE}`)
+        .post(tPayload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_GET_COMPONENT_TYPE}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
-            if (responsePayload.result == Result.Success) {
-              componentTypes = <CVMComponentType[]>JSON.parse(responsePayload.data);
+            const tResponsePayload = data.payload as ResponsePayload;
+            if (tResponsePayload.result === Result.Success) {
+              tComponentTypes = JSON.parse(tResponsePayload.data) as CVMComponentType[];
             } else {
-              componentTypes = null;
+              tComponentTypes = null;
             }
           } else {
-            componentTypes = null;
+            tComponentTypes = null;
           }
         });
-      return componentTypes;
+      return tComponentTypes;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -206,39 +208,39 @@ export class CommunicationManagerService {
    * @param {number} branchID - the branch ID
    * @returns {Promise<Counter[]>} - array of objects of type Counter wrapped in a promise.
    */
-  async getCounters(branchID: number): Promise<Array<Counter>> {
+  public async getCounters(branchID: number): Promise<Counter[]> {
     try {
-      let filtersArray = [];
-      let filter = new keyValue(Constants.cOrg_ID, '1');
-      filtersArray.push(filter);
-      filter = new keyValue(Constants.cQUEUE_BRANCH_ID, branchID.toString());
-      filtersArray.push(filter);
+      const tFiltersArray = [];
+      let tFilter = new KeyValue(Constants.cOrg_ID, '1');
+      tFiltersArray.push(tFilter);
+      tFilter = new KeyValue(Constants.cQUEUE_BRANCH_ID, branchID.toString());
+      tFiltersArray.push(tFilter);
 
-      let readEntitiesParams = [JSON.stringify(filtersArray)];
-      let payload = this.getServerPayload(Constants.cCOUNTER_READ_ENTITIES, readEntitiesParams);
-      let counters = new Array<Counter>();
+      const tReadEntitiesParams = [JSON.stringify(tFiltersArray)];
+      const tPayload = this.getServerPayload(Constants.cCOUNTER_READ_ENTITIES, tReadEntitiesParams);
+      let tCounters = new Array<Counter>();
       await this.communicationService
-        .post(payload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_COUNTERS}`)
+        .post(tPayload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_COUNTERS}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
+            const tResponsePayload = data.payload as ResponsePayload;
 
-            if (responsePayload.result == Result.Success) {
-              counters = responsePayload.data[0].map((c) => {
+            if (tResponsePayload.result === Result.Success) {
+              tCounters = tResponsePayload.data[0].map((c) => {
                 return (new Counter(c[Constants.cID], c[Constants.cNUMBER], Direction.None, false, c[Constants.cNAME_L1],
                   c[Constants.cNAME_L2], c[Constants.cNAME_L3], c[Constants.cNAME_L4]));
               });
-            } else if (responsePayload.result == -3) {
+            } else if (tResponsePayload.result === -3) {
               this.events.unAuthorizedAction.emit(Constants.cCOUNTER);
-              counters = null;
+              tCounters = null;
             } else {
-              counters = null;
+              tCounters = null;
             }
           } else {
-            counters = null;
+            tCounters = null;
           }
         });
-      return counters;
+      return tCounters;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -251,37 +253,36 @@ export class CommunicationManagerService {
    * @param {number} branchID - the branch ID
    * @returns {Promise<number[]>} - array of numbers wrapped in a promise.
    */
-  async getServicesIDs(branchID: number): Promise<Array<number>> {
+  public async getServicesIDs(branchID: number): Promise<number[]> {
     try {
-      let filtersArray = [];
-      let filter = new keyValue(Constants.cOrg_ID, '1');
-      filtersArray.push(filter);
-      filter = new keyValue(Constants.cOBJECT_ID_1, branchID.toString());
-      filtersArray.push(filter);
+      const tFiltersArray = [];
+      let tFilter = new KeyValue(Constants.cOrg_ID, '1');
+      tFiltersArray.push(tFilter);
+      tFilter = new KeyValue(Constants.cOBJECT_ID_1, branchID.toString());
+      tFiltersArray.push(tFilter);
 
-      let readEntitiesParams = [JSON.stringify(filtersArray)];
-      let payload = this.getServerPayload(Constants.cQUEUE_BRANCH_SERVICES_READ_ENTITIES, readEntitiesParams);
-      let servicesIDs = new Array<number>();
-      await this.communicationService.post(payload, Constants.cCVM_SERVER + Constants.cSLASH).then((data: Message) => {
+      const tReadEntitiesParams = [JSON.stringify(tFiltersArray)];
+      const tPayload = this.getServerPayload(Constants.cQUEUE_BRANCH_SERVICES_READ_ENTITIES, tReadEntitiesParams);
+      let tServicesIDs = new Array<number>();
+      await this.communicationService.post(tPayload, Constants.cCVM_SERVER + Constants.cSLASH).then((data: Message) => {
         if (data && data.payload) {
-          let responsePayload = <ResponsePayload>data.payload;
+          const tResponsePayload = data.payload as ResponsePayload;
 
-          if (responsePayload.result == Result.Success) {
-            servicesIDs = responsePayload.data[0].map(b => {
+          if (tResponsePayload.result === Result.Success) {
+            tServicesIDs = tResponsePayload.data[0].map((b) => {
               return b[Constants.cOBJECT_ID_2];
             });
-          } else if (responsePayload.result == -3) {
+          } else if (tResponsePayload.result === -3) {
             this.events.unAuthorizedAction.emit(Constants.cSERVICE);
-            servicesIDs = null;
-          }
-          else {
-            servicesIDs = null;
+            tServicesIDs = null;
+          } else {
+            tServicesIDs = null;
           }
         } else {
-          servicesIDs = null;
+          tServicesIDs = null;
         }
       });
-      return servicesIDs;
+      return tServicesIDs;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -294,33 +295,32 @@ export class CommunicationManagerService {
    * @param {Array<number>} servicesIDs - the ids of services to retrieve
    * @returns {Promise<Service[]>} - array of Service wrapped in a promise.
    */
-  async getServices(servicesIDs: Array<number>): Promise<Array<Service>> {
+  public async getServices(pServicesIDs: number[]): Promise<Service[]> {
     try {
-
-      let user = this.cache.getUser();
-      let readEntitiesParams = [JSON.stringify(servicesIDs), this.cache.getCurrentLanguage().id, user.userId];
-      let payload = this.getServerPayload(Constants.cSERVICES_GET_ENTITIES_NAMES, readEntitiesParams);
-      let services = new Array<Service>();
-      await this.communicationService.post(payload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_SERVICES}`)
+      const tUser = this.cache.getUser();
+      const tReadEntitiesParams = [JSON.stringify(pServicesIDs), this.cache.getCurrentLanguage().id, tUser.userId];
+      const tPayload = this.getServerPayload(Constants.cSERVICES_GET_ENTITIES_NAMES, tReadEntitiesParams);
+      let tServices = new Array<Service>();
+      await this.communicationService.post(tPayload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_SERVICES}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
+            const tResponsePayload = data.payload as ResponsePayload;
 
-            if (responsePayload.result == Result.Success) {
-              services = responsePayload.data[0].map(s => {
+            if (tResponsePayload.result === Result.Success) {
+              tServices = tResponsePayload.data[0].map((s) => {
                 return (new Service(s[Constants.cID], s[Constants.cNAME_UCC], false));
               });
-            } else if (responsePayload.result == -3) {
+            } else if (tResponsePayload.result === -3) {
               this.events.unAuthorizedAction.emit(Constants.cSERVICE);
-              services = null;
+              tServices = null;
             } else {
-              services = null;
+              tServices = null;
             }
           } else {
-            services = null;
+            tServices = null;
           }
         });
-      return services;
+      return tServices;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -335,17 +335,17 @@ export class CommunicationManagerService {
    * @param {string} data - component configuration
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async saveSettings(deviceID: number, type: string, data: string): Promise<Result> {
+  public async saveSettings(pDeviceID: number, pType: string, pData: string): Promise<Result> {
     try {
       let result = Result.Failed;
-      let payload = this.getRequestPayload(0, type, deviceID, data);
+      const tPayload = this.getRequestPayload(0, pType, pDeviceID, pData);
       await this.communicationService
-        .post(payload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cCONFIGURATION_SET_CONFIG}`)
+        .post(tPayload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cCONFIGURATION_SET_CONFIG}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
+            const tResponsePayload = data.payload as ResponsePayload;
 
-            if (responsePayload.result == Result.Success) {
+            if (tResponsePayload.result === Result.Success) {
               result = Result.Success;
             }
           }
@@ -362,10 +362,10 @@ export class CommunicationManagerService {
    * @param {string} filePath - the path the contains the file
    * @returns {Promise<any>} - string as any wrapped in a promise.
    */
-  async loadFile(filePath: string): Promise<any> {
+  public async loadFile(filePath: string): Promise<any> {
     try {
-      let file = await this.communicationService.getFile(filePath);
-      return file;
+      const tFile = await this.communicationService.getFile(filePath);
+      return tFile;
     } catch (error) {
       this.logger.error(error);
     }
@@ -376,31 +376,30 @@ export class CommunicationManagerService {
    * @summary - returns the languages of this organization
    * @returns {Promise<Language[]>} - array of Language wrapped in a promise.
    */
-  async loadLanguages(): Promise<Array<Language>> {
+  public async loadLanguages(): Promise<Language[]> {
     try {
-      let languages: Language[];
-      let payload = this.getServerPayload(Constants.cORGANIZATION_LANGUAGES_GET_LANGUAGES, null);
+      let tLanguages: Language[];
+      const tPayload = this.getServerPayload(Constants.cORGANIZATION_LANGUAGES_GET_LANGUAGES, null);
 
       await this.communicationService
-        .anonymousPost(payload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_LANGUAGES}`)
+        .anonymousPost(tPayload, `${Constants.cCVM_SERVER}${Constants.cSLASH}${Constants.cGET_LANGUAGES}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
-            if (responsePayload.result == Result.Success) {
-              let orgsLangs = responsePayload.data[0];
-              languages = orgsLangs.find(p => p.orgId === 1).languages;
-            } else if (responsePayload.result == -3) {
+            const tResponsePayload = data.payload as ResponsePayload;
+            if (tResponsePayload.result === Result.Success) {
+              const tOrgsLangs = tResponsePayload.data[0];
+              tLanguages = tOrgsLangs.find((p) => p.orgId === 1).languages;
+            } else if (tResponsePayload.result === -3) {
               this.events.unAuthorized.emit();
-              languages = null;
+              tLanguages = null;
             } else {
-              languages = null;
+              tLanguages = null;
             }
           } else {
-            languages = null;
+            tLanguages = null;
           }
         });
-
-      return languages;
+      return tLanguages;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -415,20 +414,20 @@ export class CommunicationManagerService {
    * @param {string} data - command as string
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async executeCommand(deviceID: number, type: string, data: string): Promise<Result> {
+  public async executeCommand(pDeviceID: number, pType: string, pData: string): Promise<Result> {
     try {
-      let result = Result.Failed;
-      let commanData = JSON.stringify({ command: data });
-      let payload = this.getRequestPayload(0, type, deviceID, commanData);
+      let tResult = Result.Failed;
+      const tCommanData = JSON.stringify({ command: pData });
+      const tPayload = this.getRequestPayload(0, pType, pDeviceID, tCommanData);
       await this.communicationService
-        .post(payload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_EXECUTE_COMMAND}`)
+        .post(tPayload, `${Constants.cCOMPONENT_SERVICE}${Constants.cSLASH}${Constants.cMANAGER_EXECUTE_COMMAND}`)
         .then((data: Message) => {
           if (data && data.payload) {
-            let responsePayload = <ResponsePayload>data.payload;
-            result = responsePayload.result;
+            const tResponsePayload = data.payload as ResponsePayload;
+            tResult = tResponsePayload.result;
           }
         });
-      return result;
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return Result.Failed;
@@ -445,19 +444,19 @@ export class CommunicationManagerService {
    * @param pOrderBy
    * @param filter
    */
-  private getRequestPayload(pBranchID?: number, pType?: string, pDeviceID?: number, pData?: string, pPageNumber?: number, pOrderBy?: string, filter?: Filter): RequestPayload {
+  private getRequestPayload(pBranchID?: number, pType?: string, pDeviceID?: number, pData?: string, pPageNumber?: number, pOrderBy?: string, pFilter?: Filter): RequestPayload {
     try {
-      let payload = new RequestPayload();
-      payload.orgID = 1;
-      payload.typeName = pType;
-      payload.branchID = pBranchID;
-      payload.componentID = pDeviceID;
-      payload.data = pData;
-      payload.pageNumber = pPageNumber;
-      payload.orderBy = pOrderBy;
-      payload.limit = 250;
-      payload.filter = filter ? JSON.stringify(filter) : null;
-      return payload;
+      const tPayload = new RequestPayload();
+      tPayload.orgID = 1;
+      tPayload.typeName = pType;
+      tPayload.branchID = pBranchID;
+      tPayload.componentID = pDeviceID;
+      tPayload.data = pData;
+      tPayload.pageNumber = pPageNumber;
+      tPayload.orderBy = pOrderBy;
+      tPayload.limit = 250;
+      tPayload.filter = pFilter ? JSON.stringify(pFilter) : null;
+      return tPayload;
     } catch (error) {
       this.logger.error(error);
     }
@@ -468,13 +467,13 @@ export class CommunicationManagerService {
    * @param target
    * @param data
    */
-  private getServerPayload(target, data): ServerPayload {
+  private getServerPayload(pTarget, pData): ServerPayload {
     try {
-      let payload = new ServerPayload();
-      payload.target = target;
-      payload.data = data ? JSON.stringify(data): JSON.stringify(new Array<any>());
+      const tPayload = new ServerPayload();
+      tPayload.target = pTarget;
+      tPayload.data = pData ? JSON.stringify(pData) : JSON.stringify(new Array<any>());
 
-      return payload;
+      return tPayload;
     } catch (error) {
       this.logger.error(error);
     }

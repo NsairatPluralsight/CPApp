@@ -9,30 +9,28 @@ import { Constants } from '../shared/models/constants';
 
 @Injectable()
 export class CounterLCDService {
-  counters: Counter[];
-  counterLCD: CVMComponent;
-  counterLCDConfiguration: CounterLCDConfiguration;
+  public counters: Counter[];
+  public counterLCD: CVMComponent;
+  public counterLCDConfiguration: CounterLCDConfiguration;
   constructor(private logger: LoggerService, private communicationManager: CommunicationManagerService) { }
 
   /**
    * @async
    * @summary - initialize the data needed for the counter LCD component
-   * @param {number} id - the ID of the component
+   * @param {number} pID - the ID of the component
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async getSettings(id: number): Promise<Result> {
+  public async getSettings(pID: number): Promise<Result> {
     try {
-
-      this.counterLCD = (await this.communicationManager.getComponent(0, null, id))[0];
+      this.counterLCD = (await this.communicationManager.getComponent(0, null, pID))[0];
 
       if (this.counterLCD) {
         this.counters = await this.communicationManager.getCounters(this.counterLCD.queueBranch_ID);
 
         if (this.counters && this.counters.length > 0) {
 
-          let result = await this.prepareConfiguration();
-          return result;
-
+          const tResult = await this.prepareConfiguration();
+          return tResult;
         } else {
           return Result.Failed;
         }
@@ -50,18 +48,15 @@ export class CounterLCDService {
    * @summary - set ot intilize the counter LCD configurations
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async prepareConfiguration(): Promise<Result> {
+  public async prepareConfiguration(): Promise<Result> {
     try {
-
       if (this.counterLCD.configuration) {
-        this.counterLCDConfiguration = <CounterLCDConfiguration>this.counterLCD.configuration;
+        this.counterLCDConfiguration =  this.counterLCD.configuration as CounterLCDConfiguration;
       } else {
         this.counterLCDConfiguration = new CounterLCDConfiguration(0);
       }
-
       return Result.Success;
-    }
-    catch (error) {
+    } catch (error) {
       this.logger.error(error);
       return Result.Failed;
     }
@@ -70,15 +65,14 @@ export class CounterLCDService {
   /**
    * @async
    * @summary - save the component configuration
-   * @param {number} id - the ID of the component
+   * @param {number} pID - the ID of the component
    * @param {CounterLCDConfiguration} configuration - counter LCd configuration
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async setConfiguration(id: number, configuration: CounterLCDConfiguration): Promise<Result> {
+  public async setConfiguration(pID: number, pConfiguration: CounterLCDConfiguration): Promise<Result> {
     try {
-      let result = await this.communicationManager.saveSettings(id, Constants.cCOUNTER_LCD, JSON.stringify(configuration));
-
-      return result;
+      const tResult = await this.communicationManager.saveSettings(pID, Constants.cCOUNTER_LCD, JSON.stringify(pConfiguration));
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return Result.Failed;
@@ -91,10 +85,10 @@ export class CounterLCDService {
    * @param {number} id - the ID of the component
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async identify(id: number): Promise<Result> {
+  public async identify(pID: number): Promise<Result> {
     try {
-      let result = await this.communicationManager.executeCommand(id, Constants.cCOUNTER_LCD, Constants.cHELLO);
-      return result;
+      const tResult = await this.communicationManager.executeCommand(pID, Constants.cCOUNTER_LCD, Constants.cHELLO);
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return Result.Failed;

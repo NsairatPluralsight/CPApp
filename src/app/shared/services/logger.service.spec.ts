@@ -1,14 +1,12 @@
-import { TestBed, inject } from '@angular/core/testing';
-
+import { TestBed } from '@angular/core/testing';
 import { LoggerService } from './logger.service';
 
 describe('LoggerService', () => {
   let service: LoggerService;
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [LoggerService]
+      providers: [LoggerService],
     });
-
     service = TestBed.get(LoggerService);
   });
 
@@ -17,7 +15,7 @@ describe('LoggerService', () => {
   });
 
   it('should call error method', () => {
-    let spy = spyOn(service, 'error');
+    const spy = spyOn(service, 'error');
 
     service.error(new Error('test'));
 

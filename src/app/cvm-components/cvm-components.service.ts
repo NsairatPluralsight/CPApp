@@ -9,10 +9,10 @@ import { Filter } from '../shared/models/filter';
 
 @Injectable()
 export class CVMComponentsService {
-  branches: Branch[];
-  types: CVMComponentType[];
-  component: CVMComponent[];
-  count: number;
+  public branches: Branch[];
+  public types: CVMComponentType[];
+  public component: CVMComponent[];
+  public count: number;
 
   constructor(private communicationManager: CommunicationManagerService, private logger: LoggerService) { }
 
@@ -21,23 +21,22 @@ export class CVMComponentsService {
    * @summary - get the data to initialize the cvm-components component
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async initialize(): Promise<Result> {
+  public async initialize(): Promise<Result> {
     try {
-      let branchID = 0;
+      let tBranchID = 0;
       this.branches = await this.communicationManager.getBranches();
-      if(!this.branches || this.branches.length <= 0) {
+      if (!this.branches || this.branches.length <= 0) {
         this.logger.error(new Error('couldnt get branches'));
-        branchID= -1;
+        tBranchID = -1;
       }
 
       this.types = await this.communicationManager.getComponentTypes();
-      if(!this.types || this.types.length <= 0) {
+      if (!this.types || this.types.length <= 0) {
         return Result.Failed;
       }
 
-      let result = await this.getCount(branchID);
-
-      return result;
+      const tResult = await this.getCount(tBranchID);
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return Result.Failed;
@@ -51,10 +50,10 @@ export class CVMComponentsService {
    * @param {string} typeName - optional the type of components
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  async getCount(branchID: number, typeName?: string): Promise<Result> {
+  public async getCount(pBranchID: number, pTypeName?: string): Promise<Result> {
     try {
-      this.count = await this.communicationManager.getComponentsCount(branchID, typeName);
-      if(this.count === null || this.count === undefined) {
+      this.count = await this.communicationManager.getComponentsCount(pBranchID, pTypeName);
+      if (this.count === null || this.count === undefined) {
         return Result.Failed;
       }
       return Result.Success;
@@ -75,9 +74,9 @@ export class CVMComponentsService {
    * @param {Filter} filter - object that contains the text to search for and columns name to search in
    * @returns {Promise<CVMComponent[]>} - array of objects of type CVMComponent wrapped in a promise.
    */
-  async getDevices(pageNumber: number, columnName: string, branchID: number, type?: string, filter?: Filter): Promise<CVMComponent[]>  {
+  public async getDevices(pPageNumber: number, pColumnName: string, pBranchID: number, pType?: string, pFilter?: Filter): Promise<CVMComponent[]>  {
     try {
-      return await this.communicationManager.getComponent(branchID, type, null, pageNumber, columnName, filter);
+      return await this.communicationManager.getComponent(pBranchID, pType, null, pPageNumber, pColumnName, pFilter);
     } catch (error) {
       this.logger.error(error);
       return null;

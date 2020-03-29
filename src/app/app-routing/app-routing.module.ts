@@ -14,12 +14,12 @@ const routes: Routes = [
   { path: 'signin',  component: LoginComponent, canActivate: [DefenderGuard] },
   { path: 'error', component: ErrorComponent},
   { path: '', redirectTo: 'signin', pathMatch: 'full' },
-  { path: '**', redirectTo: 'signin', pathMatch: 'full' }
+  { path: '**', redirectTo: 'signin', pathMatch: 'full' },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, { useHash: true })],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 
 export class AppRoutingModule { }

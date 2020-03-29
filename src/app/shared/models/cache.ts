@@ -1,8 +1,8 @@
-import { AuthenticatedUser } from "./user";
-import { Language } from "./language";
+import { Language } from './language';
+import { AuthenticatedUser } from './authenticated-User';
 
 export class Cache {
-  user: AuthenticatedUser;
-  languages: Language[];
-  currentLanguage: Language;
+  public user: AuthenticatedUser;
+  public languages: Language[];
+  public currentLanguage: Language;
 }

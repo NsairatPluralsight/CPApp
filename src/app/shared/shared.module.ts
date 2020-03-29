@@ -13,21 +13,21 @@ import { UserMenuComponent } from './components/user-menu.component';
 @NgModule({
   imports: [
     CommonModule,
-    MaterialModule
+    MaterialModule,
   ],
   declarations: [DialogComponent, SpinnerComponent, UserMenuComponent],
-  providers:[
+  providers: [
     CommunicationService,
     LoggerService,
     CommunicationManagerService,
     StateService,
-    MultilingualService
+    MultilingualService,
   ],
-  exports:[
+  exports: [
     DialogComponent,
     SpinnerComponent,
-    UserMenuComponent
+    UserMenuComponent,
   ],
-  entryComponents:[DialogComponent]
+  entryComponents: [DialogComponent],
 })
 export class SharedModule { }

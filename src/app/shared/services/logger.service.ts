@@ -3,18 +3,20 @@ import { Constants } from '../models/constants';
 
 @Injectable()
 export class LoggerService {
+  // tslint:disable: no-console
 
+  // tslint:disable-next-line: no-empty
   constructor() { }
 
   /**
-  * @summary - log error to the browser console
-  * @param {error} error - the error that will be logged.
-  */
-  error(error: Error): void {
-    console.error(`${Constants.cNAME}:  ${error.name} ${Constants.cMESSAGE}:  ${error.message}  ${Constants.cSTACK_TRACE}:  ${error.stack}`);
+   * @summary - log error to the browser console
+   * @param {error} error - the error that will be logged.
+   */
+  public error(pError: Error): void {
+    console.error(`${Constants.cNAME}:  ${pError.name} ${Constants.cMESSAGE}:  ${pError.message}  ${Constants.cSTACK_TRACE}:  ${pError.stack}`);
   }
 
-  info(message: string) {
-    console.log(`INFORMATION: ${message}`);
+  public info(pMessage: string) {
+    console.log(`INFORMATION: ${pMessage}`);
   }
 }

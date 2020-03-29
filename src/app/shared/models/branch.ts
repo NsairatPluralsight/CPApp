@@ -1,6 +1,6 @@
 export class Branch {
-  id: number;
-  name: string;
+  public id: number;
+  public name: string;
 
   constructor(pID: number, pName: string) {
     this.id = pID;

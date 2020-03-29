@@ -1,9 +1,9 @@
 export class CVMComponentType {
-  id: number;
-  typeName: string;
-  captionKey: string;
-  configurationSchema: string;
-  reportedDataSchema: string;
-  creationTime: any;
-  lastUpdateTime: any;
+  public id: number;
+  public typeName: string;
+  public captionKey: string;
+  public configurationSchema: string;
+  public reportedDataSchema: string;
+  public creationTime: any;
+  public lastUpdateTime: any;
 }

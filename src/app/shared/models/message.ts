@@ -1,8 +1,8 @@
 export class Message {
-  time = 0;
-  messageID: string;
-  source: string;
-  correlationId: string;
-  topicName: string;
-  payload: any;
+  public time = 0;
+  public messageID: string;
+  public source: string;
+  public correlationId: string;
+  public topicName: string;
+  public payload: any;
 }

@@ -14,11 +14,11 @@ import { MaterialModule } from '../material/material.module';
     RouterModule,
     SharedModule,
     ReactiveFormsModule,
-    MaterialModule
+    MaterialModule,
     ],
   declarations: [MainLCDComponent, DirectionComponent],
   providers: [MainLCDService],
-  entryComponents:[DirectionComponent],
-  bootstrap: [MainLCDComponent]
+  entryComponents: [DirectionComponent],
+  bootstrap: [MainLCDComponent],
 })
 export class MainLCDModule { }

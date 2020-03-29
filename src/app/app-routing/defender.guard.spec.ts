@@ -5,22 +5,25 @@ import { LoggerService } from '../shared/services/logger.service';
 import { SessionStorageService } from '../shared/services/session-storage.service';
 import { AuthenticationService } from '../shared/services/authentication.service';
 import { Router } from '@angular/router';
-import { AuthenticatedUser } from '../shared/models/user';
 import { CommunicationService } from '../shared/services/communication.service';
-import { Result } from '../shared/models/enum';
-import { CommonActionsService } from '../shared/services/common-actions.service';
 import { MultilingualService } from '../shared/services/multilingual.service';
 import { CommunicationManagerService } from '../shared/services/communication-manager.service';
+import { AuthenticatedUser } from '../shared/models/authenticated-User';
 
 describe('DefenderGuard', () => {
   let guard: DefenderGuard;
-  let mockLoggerservice, mockSessionStorageService, mockCommService, mockMultilingualService, mockCommunicationManagerService;
+  let mockLoggerservice;
+  let mockSessionStorageService;
+  let mockCommService;
+  const mockMultilingualService = {};
+  const mockCommunicationManagerService = {};
+
   mockCommService = {
-    authenticate() { }
+    authenticate() { return; },
   };
 
-  let mockRouter = {
-    navigate: jasmine.createSpy('navigate')
+  const mockRouter = {
+    navigate: jasmine.createSpy('navigate'),
   };
 
   beforeEach(() => {
@@ -36,10 +39,9 @@ describe('DefenderGuard', () => {
         { provide: CommunicationService, useValue: mockCommService },
         { provide: SessionStorageService, useValue: mockSessionStorageService },
         { provide: LoggerService, useValue: mockLoggerservice },
-        { provide: Router, useValue: mockRouter }
-      ]
+        { provide: Router, useValue: mockRouter },
+      ],
     });
-
     guard = TestBed.get(DefenderGuard);
   });
 
@@ -52,19 +54,18 @@ describe('DefenderGuard', () => {
     beforeEach(() => {
       next = {
         routeConfig:  {
-          path: ''
-        }
+          path: '',
+        },
       };
-
       mockRouter.navigate.calls.reset();
     });
 
     it('should return true', async () => {
-      let startLoadingTimerSpy = spyOn(guard, 'startLoadingTimer');
-      let authServiceSpy = spyOn(AuthenticationService.prototype, 'SSOLogin');
-      spyOn(CacheService.prototype, 'getUser').and.callFake(() => { return new AuthenticatedUser() });
+      const startLoadingTimerSpy = spyOn(guard, 'startLoadingTimer');
+      const authServiceSpy = spyOn(AuthenticationService.prototype, 'SSOLogin');
+      spyOn(CacheService.prototype, 'getUser').and.callFake(() => new AuthenticatedUser());
 
-      let result = await guard.canActivate(next, null);
+      const result = await guard.canActivate(next, null);
 
       expect(result).toBe(true);
       expect(startLoadingTimerSpy).toHaveBeenCalledTimes(1);
@@ -73,11 +74,11 @@ describe('DefenderGuard', () => {
     });
 
     it('should call navigate and return true', async () => {
-      let startLoadingTimerSpy = spyOn(guard, 'startLoadingTimer');
-      spyOn(CacheService.prototype, 'getUser').and.callFake(() => { return new AuthenticatedUser() });
+      const startLoadingTimerSpy = spyOn(guard, 'startLoadingTimer');
+      spyOn(CacheService.prototype, 'getUser').and.callFake(() => new AuthenticatedUser());
 
       next.routeConfig.path = 'signin';
-      let result = await guard.canActivate(next, null);
+      const result = await guard.canActivate(next, null);
 
       expect(result).toBe(true);
       expect(startLoadingTimerSpy).toHaveBeenCalledTimes(1);
@@ -85,10 +86,10 @@ describe('DefenderGuard', () => {
     });
 
     it('should call navigate and return false', async () => {
-      let startLoadingTimerSpy = spyOn(guard, 'startLoadingTimer');
-      spyOn(CacheService.prototype, 'getUser').and.callFake(() => { return null });
+      const startLoadingTimerSpy = spyOn(guard, 'startLoadingTimer');
+      spyOn(CacheService.prototype, 'getUser').and.callFake(() => null);
 
-      let result = await guard.canActivate(next, null);
+      const result = await guard.canActivate(next, null);
 
       expect(result).toBe(false);
       expect(startLoadingTimerSpy).toHaveBeenCalledTimes(1);

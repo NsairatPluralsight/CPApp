@@ -18,52 +18,51 @@ import { Language } from '../shared/models/language';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  public loginForm: FormGroup;
+  public userNameCaption: string;
+  public passwordCaption: string;
+  public signinCaption: string;
+  public languages: Language[];
+  public selectedLanguageID = 1;
+  public showLoginForm: boolean;
+  public showLanguage: boolean;
+  public continue: string;
+  public languageDirection: string;
+  public serverError: string = Constants.cERROR_CONNECTING_TO_SERVER;
   private subscription: Subscription;
-  loginForm: FormGroup;
-  userNameCaption: string;
-  passwordCaption: string;
-  signinCaption: string;
-  languages: Language[];
-  selectedLanguageID = 1;
-  showLoginForm: boolean;
-  showLanguage: boolean;
-  continue: string;
-  languageDirection: string;
-  serverError: string = Constants.cERROR_CONNECTING_TO_SERVER;
 
   constructor(private logger: LoggerService, public languageService: MultilingualService,
-    private eventService: EventsService, private session: SessionStorageService,
-    private cdRef: ChangeDetectorRef, private fb: FormBuilder, public dialog: MatDialog,
-    private authService: AuthenticationService, private router: Router, private cacheService: CacheService,
-    private commonService: CommonActionsService, private route: ActivatedRoute) {
+              private eventService: EventsService, private session: SessionStorageService,
+              private cdRef: ChangeDetectorRef, private fb: FormBuilder, public dialog: MatDialog,
+              private authService: AuthenticationService, private router: Router, private cacheService: CacheService,
+              private commonService: CommonActionsService, private route: ActivatedRoute) {
     this.listenToEvents();
   }
 
-  async ngOnInit(): Promise<void> {
+  public async ngOnInit(): Promise<void> {
     this.loginForm = this.fb.group({
       userName: ['', Validators.required],
       password: ['', Validators.required],
     });
-    let language = this.cacheService.getCurrentLanguage();
-    if (language) {
-      this.selectedLanguageID = language.id;
+    const tLanguage = this.cacheService.getCurrentLanguage();
+    if (tLanguage) {
+      this.selectedLanguageID = tLanguage.id;
     }
     await this.languageChange(this.selectedLanguageID);
     if (this.languages) {
       this.showLanguage = true;
     }
     this.loadCaptions();
-
     await this.trySSO();
   }
 
   /**
    * @summary - get the text caption for the component
    */
-  loadCaptions(): void {
+  public loadCaptions(): void {
     try {
       this.languageDirection = this.cacheService.getCurrentLanguage().rtl === 1 ? Constants.cRTL : Constants.cLTR;
       this.userNameCaption = this.languageService.getCaption(Constants.cUSER_NAME);
@@ -77,19 +76,19 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-  * @async
-  * @summary - try to login using windows user
-  */
-  async trySSO() {
+   * @async
+   * @summary - try to login using windows user
+   */
+  public async trySSO() {
     try {
-      let result = this.cacheService.getIsDiffrentUser();
+      let tResult = this.cacheService.getIsDiffrentUser();
 
-      if(!result) {
-        let loginResult = await this.authService.SSOLogin();
+      if (!tResult) {
+        const tLoginResult = await this.authService.SSOLogin();
 
-        if (loginResult === LoginErrorCodes.Success) {
-          result = await this.commonService.checkUserPermission();
-          if (!result) {
+        if (tLoginResult === LoginErrorCodes.Success) {
+          tResult = await this.commonService.checkUserPermission();
+          if (!tResult) {
             this.showError(Error.NotAllowed);
           } else {
             this.showLoginForm = false;
@@ -109,29 +108,27 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-  * @async
-  * @summary - get login information from form and try to login
-  */
-  async login(): Promise<void> {
+   * @async
+   * @summary - get login information from form and try to login
+   */
+  public async login(): Promise<void> {
     try {
-      let userName = this.loginForm.get(Constants.cUSER_NAME_LCC).value;
-      let password = this.loginForm.get(Constants.cPASSWORD.toLowerCase()).value;
+      const tUserName = this.loginForm.get(Constants.cUSER_NAME_LCC).value;
+      const tPassword = this.loginForm.get(Constants.cPASSWORD.toLowerCase()).value;
 
-      let result = await this.authService.login(userName, password);
+      const tResult = await this.authService.login(tUserName, tPassword);
 
-      if (result == LoginErrorCodes.Success) {
+      if (tResult === LoginErrorCodes.Success) {
+        const tIsAuthorized = await this.commonService.checkUserPermission();
 
-        let isAuthorized = await this.commonService.checkUserPermission();
-
-        if (isAuthorized) {
+        if (tIsAuthorized) {
           this.goToMainPage();
         } else {
           this.showError(Error.NotAllowed);
         }
       } else {
-        this.showError(result);
+        this.showError(tResult);
       }
-
     } catch (error) {
       this.logger.error(error);
     }
@@ -140,7 +137,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   /**
    * @summary - redirect user to main page and rais user login event
    */
-  goToMainPage() {
+  public goToMainPage() {
     try {
       this.session.raiseUserLogin();
       this.cacheService.setIsDiffrentUser(null);
@@ -151,13 +148,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   /**
-  * @async
-  * @summary - opens an error dialog
-  * @param {number} errorCode - the code of error to get the caption
-  */
-  async showError(errorCode: number): Promise<void> {
+   * @async
+   * @summary - opens an error dialog
+   * @param {number} errorCode - the code of error to get the caption
+   */
+  public async showError(pErrorCode: number): Promise<void> {
     try {
-      let error = this.commonService.getErrorCaption(errorCode);
+      const error = this.commonService.getErrorCaption(pErrorCode);
 
       await this.openDialog(Constants.cERROR, '', error, '', Constants.cOK);
     } catch (error) {
@@ -175,21 +172,21 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @param {string} yesText - the yes button text
    * @param {any} callBack - optional function to call after confirmation
    */
-  async openDialog(title: string, subTitle: string, message: string, cancelText: string, yesText: string, callBack?: any): Promise<void> {
+  public async openDialog(pTitle: string, pSubTitle: string, pMessage: string, pCancelText: string, pYesText: string, pCallBack?: any): Promise<void> {
     try {
-      let dialogRef = this.dialog.open(DialogComponent, {
+      const dialogRef = this.dialog.open(DialogComponent, {
         data: {
-          title: title,
-          subTitle: subTitle,
-          message: message,
-          cancelText: cancelText,
-          yesText: yesText
-        }
+          title: pTitle,
+          subTitle: pSubTitle,
+          message: pMessage,
+          cancelText: pCancelText,
+          yesText: pYesText,
+        },
       });
 
       dialogRef.afterClosed().subscribe((result) => {
-        if (callBack) {
-          callBack(result);
+        if (pCallBack) {
+          pCallBack(result);
         }
       });
     } catch (error) {
@@ -201,11 +198,10 @@ export class LoginComponent implements OnInit, OnDestroy {
    * @summary - change language
    * @param id - language id
    */
-  async languageChange(id: number): Promise<void> {
+  public async languageChange(id: number): Promise<void> {
     try {
       await this.languageService.loadLanguage(id);
       this.languages = this.languageService.languages;
-      // this.languageDirection = this.languageService.
       this.loadCaptions();
     } catch (error) {
       this.logger.error(error);
@@ -215,9 +211,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   /**
    * @summary - subscribes to events
    */
-  listenToEvents(): void {
+  public listenToEvents(): void {
     try {
-
       this.subscription = this.eventService.languageChanged.subscribe(() => {
         this.loadCaptions();
         if (!this.cdRef[Constants.cDESTROYED]) {
@@ -225,22 +220,21 @@ export class LoginComponent implements OnInit, OnDestroy {
         }
       });
 
-      const routeSub = this.route.queryParams.subscribe(async params => {
+      const routeSub = this.route.queryParams.subscribe(async (params) => {
         if (params && params.error) {
-          await this.showError(parseInt(params.error));
+          await this.showError(parseInt(params.error, 0));
         }
       });
       this.subscription.add(routeSub);
-
     } catch (error) {
       this.logger.error(error);
     }
   }
 
   /**
-  * @summary - unsubscribes to events
-  */
-  ngOnDestroy(): void {
+   * @summary - unsubscribes to events
+   */
+  public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
     } catch (error) {

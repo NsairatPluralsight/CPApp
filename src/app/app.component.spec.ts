@@ -1,4 +1,4 @@
-import { TestBed, async, ComponentFixture, inject, fakeAsync } from '@angular/core/testing';
+import { TestBed, async, ComponentFixture } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { EventEmitter } from 'events';
 import { StateService } from './shared/services/state.service';
@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { SessionStorageService } from './shared/services/session-storage.service';
 import { CommunicationService } from './shared/services/communication.service';
 import { CacheService } from './shared/services/cache.service';
-import { RouterTestingModule } from '@angular/router/testing'
+import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CommunicationManagerService } from './shared/services/communication-manager.service';
 import { SharedModule } from './shared/shared.module';
@@ -19,7 +19,9 @@ import { ConnectivityService } from './shared/services/connectivity.service';
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
-  let mockLoggerservice, mockEventsService, mockCommunicationManagerService;
+  let mockLoggerservice;
+  let mockEventsService;
+  const mockCommunicationManagerService = {};
 
   mockEventsService = {
     statusUpdate: new EventEmitter(),
@@ -30,7 +32,7 @@ describe('AppComponent', () => {
     logoutUser: new EventEmitter(),
     unAuthorized: new EventEmitter(),
     onDisconnect: new EventEmitter(),
-    environmentStatusChanged: new EventEmitter()
+    environmentStatusChanged: new EventEmitter(),
   };
 
   mockEventsService.statusUpdate = new EventEmitter();
@@ -41,25 +43,24 @@ describe('AppComponent', () => {
     mockEventsService.logoutUser = new EventEmitter(),
     mockEventsService.unAuthorized = new EventEmitter(),
     mockEventsService.onDisconnect = new EventEmitter(),
-    mockEventsService.environmentStatusChanged = new EventEmitter()
+    mockEventsService.environmentStatusChanged = new EventEmitter();
 
-  let mockRouter = {
-    navigate: jasmine.createSpy('navigate')
+  const mockRouter = {
+    navigate: jasmine.createSpy('navigate'),
   };
 
-  let mockConnService = {
+  const mockConnService = {
     getEnvironmentStatus() { return true; },
     reset() {
       return;
-    }
-  }
+    },
+  };
 
   beforeEach(async(() => {
     mockLoggerservice = jasmine.createSpyObj(['error', 'info']);
-
     TestBed.configureTestingModule({
       declarations: [
-        AppComponent
+        AppComponent,
       ],
       providers: [
         StateService,
@@ -77,8 +78,8 @@ describe('AppComponent', () => {
         MaterialModule,
         RouterTestingModule,
         HttpClientTestingModule,
-        SharedModule
-      ]
+        SharedModule,
+      ],
     }).compileComponents();
   }));
 
@@ -89,10 +90,9 @@ describe('AppComponent', () => {
   }));
 
   describe('logout', () => {
-
     it('should call two methods', async () => {
-      let raiseUserLogoutSpy = spyOn(SessionStorageService.prototype, 'raiseUserLogout');
-      let handleLogoutSpy = spyOn(component, 'handleLogout');
+      const raiseUserLogoutSpy = spyOn(SessionStorageService.prototype, 'raiseUserLogout');
+      const handleLogoutSpy = spyOn(component, 'handleLogout');
 
       await component.logout();
 
@@ -103,18 +103,15 @@ describe('AppComponent', () => {
   });
 
   describe('handleLogout', () => {
-
     it('should call four methods', async () => {
-      let storeDataSpy = spyOn(SessionStorageService.prototype, 'storeData');
-      let closeSocketIOSpy = spyOn(CommunicationService.prototype, 'closeSocketIO');
-      let logoutSpy = spyOn(CommunicationService.prototype, 'logout');
-      //let resetSpy = spyOn(envStatus, 'reset');
+      const storeDataSpy = spyOn(SessionStorageService.prototype, 'storeData');
+      const closeSocketIOSpy = spyOn(CommunicationService.prototype, 'closeSocketIO');
+      const logoutSpy = spyOn(CommunicationService.prototype, 'logout');
       await component.handleLogout();
 
       expect(logoutSpy).toHaveBeenCalledTimes(1);
       expect(storeDataSpy).toHaveBeenCalledTimes(1);
       expect(closeSocketIOSpy).toHaveBeenCalledTimes(1);
-      //expect(resetSpy).toHaveBeenCalledTimes(1);
       expect(mockRouter.navigate).toHaveBeenCalledTimes(1);
     });
   });

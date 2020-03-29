@@ -22,33 +22,30 @@ import { NumberValidators } from '../shared/models/number.validator';
 describe('MainLCDConfigurationComponent', () => {
   let component: MainLCDComponent;
   let fixture: ComponentFixture<MainLCDComponent>;
-  let mockLoggerservice, mockEventsService, mockMultilingualService,
-   mockCommunicationManagerService;
-   const formBuilder: FormBuilder = new FormBuilder();
+  let mockLoggerservice;
+  let mockEventsService;
+  let mockMultilingualService;
+  const mockCommunicationManagerService = {};
+  const formBuilder: FormBuilder = new FormBuilder();
 
   mockEventsService = {
     statusUpdate: new EventEmitter(),
     languageChanged: new EventEmitter(),
   };
-
   mockEventsService.statusUpdate = new EventEmitter();
   mockEventsService.languageChanged = new EventEmitter();
-
   mockMultilingualService = {
-    getCaption() { return 'test' }
+    getCaption() { return 'test'; },
   };
-
-  let mockRouter = {
-    params: jasmine.createSpy('navigate')
+  const mockRouter = {
+    params: jasmine.createSpy('navigate'),
   };
-
-  let mockRoute = {
-    params: jasmine.createSpy('subscribe')
+  const mockRoute = {
+    params: jasmine.createSpy('subscribe'),
   };
 
   beforeEach(async(() => {
     mockLoggerservice = jasmine.createSpyObj(['error', 'info']);
-
     TestBed.configureTestingModule({
       declarations: [ MainLCDComponent ],
       providers: [
@@ -64,15 +61,15 @@ describe('MainLCDConfigurationComponent', () => {
         ChangeDetectorRef,
         MatDialog,
         FormBuilder,
-        CacheService
+        CacheService,
       ],
       imports: [
         MaterialModule,
         ReactiveFormsModule,
         SharedModule,
         RouterTestingModule,
-        BrowserAnimationsModule
-      ]
+        BrowserAnimationsModule,
+      ],
     })
     .compileComponents();
   }));
@@ -85,7 +82,7 @@ describe('MainLCDConfigurationComponent', () => {
       pageDuration: [10, NumberValidators.range(5, 300)],
       countersValue: [CountersOption.All],
       playerMode: [MainLCDDisplayMode.CurrentCustomer],
-      servicesValue: [true]
+      servicesValue: [true],
     });
     fixture.detectChanges();
   });
@@ -95,11 +92,10 @@ describe('MainLCDConfigurationComponent', () => {
   });
 
   describe('showError', () => {
-
     it('should call get getErrorCaption and openDialog', async () => {
-      let getErrorCaptionSpy = spyOn(CommonActionsService.prototype, 'getErrorCaption').and.callFake(
-        () => {return 'test' });
-      let openDialogSpy = spyOn(component, 'openDialog');
+      const getErrorCaptionSpy = spyOn(CommonActionsService.prototype, 'getErrorCaption').and.callFake(
+        () => 'test');
+      const openDialogSpy = spyOn(component, 'openDialog');
 
       await component.showError(-100);
 
@@ -109,9 +105,8 @@ describe('MainLCDConfigurationComponent', () => {
   });
 
   describe('getPermition', () => {
-
     it('should call check per', () => {
-      let spy = spyOn(CommonActionsService.prototype, 'checkPermission');
+      const spy = spyOn(CommonActionsService.prototype, 'checkPermission');
 
       component.getPermition();
 
@@ -120,14 +115,12 @@ describe('MainLCDConfigurationComponent', () => {
   });
 
   describe('identify', () => {
-
     it('should call identify', async () => {
-      let spy = spyOn(MainLCDService.prototype, 'identify');
+      const spy = spyOn(MainLCDService.prototype, 'identify');
 
       await component.identify();
 
       expect(spy).toHaveBeenCalledTimes(1);
     });
-
   });
 });

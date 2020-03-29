@@ -8,33 +8,29 @@ import { ServiceStatusReport } from '../models/service-status-report';
 import { Message } from '../models/message';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ConnectivityService {
-
-  initialized: boolean;
-  maxServerReconnectTrials = 2;
-  serverReconnectInterval = 25000;
-  reconnectInterval = 5000;
-  maxReconnectMinutes = 2;
-
+  public initialized: boolean;
+  public maxServerReconnectTrials = 2;
+  public serverReconnectInterval = 25000;
+  public reconnectInterval = 5000;
+  public maxReconnectMinutes = 2;
   private servicesToMaintain = [Constants.cCOMPONENT_SERVICE.toLowerCase(), Constants.cCVM_SERVER.toLowerCase()];
-
   private monitorConnectionInterval = undefined;
   private serviceStatusReports: ServiceStatusReport[] = [];
   private connected = true;
   private lastConnectivityUpdateTime: number;
   private endpointServiceStatusReport: ServiceStatusReport;
 
-
   constructor(private eventService: EventsService, private logger: LoggerService,
-    private stateService: StateService) {
+              private stateService: StateService) {
     this.eventService.reconnect.subscribe((result) => {
-      this.handleReconnect(result)
+      this.handleReconnect(result);
     });
 
     this.eventService.servicesStatusUpdate.subscribe((message: Message) => {
-      this.updateServicesStatusReports(message.payload.servicesStatuses, message.time);// Mn ween bde ajeb al time :/
+      this.updateServicesStatusReports(message.payload.servicesStatuses, message.time); // Mn ween bde ajeb al time :/
     });
   }
 
@@ -42,19 +38,19 @@ export class ConnectivityService {
    * @summary initializes the service with the initial status reports
    * @param serviceStatusReports - service status reports for all services
    */
-  initialize(serviceStatusReports: ServiceStatusReport[], timeStamp: number) {
+  public initialize(pServiceStatusReports: ServiceStatusReport[], pTimeStamp: number) {
     try {
       this.endpointServiceStatusReport = new ServiceStatusReport();
       this.endpointServiceStatusReport.status = ServiceStatus.Working;
       this.endpointServiceStatusReport.serviceName = Constants.endpointModuleName.toLowerCase();
       this.serviceStatusReports = [];
       this.servicesToMaintain.forEach((service) => {
-        let tempServiceStatusReports = new ServiceStatusReport();
-        tempServiceStatusReports.serviceName = service;
-        tempServiceStatusReports.status = ServiceStatus.Unknown;
-        this.serviceStatusReports.push(tempServiceStatusReports);
+        const tTempServiceStatusReports = new ServiceStatusReport();
+        tTempServiceStatusReports.serviceName = service;
+        tTempServiceStatusReports.status = ServiceStatus.Unknown;
+        this.serviceStatusReports.push(tTempServiceStatusReports);
       });
-      this.updateServicesStatusReports(serviceStatusReports, timeStamp);
+      this.updateServicesStatusReports(pServiceStatusReports, pTimeStamp);
       this.initialized = true;
       this.monitorConnectivty();
     } catch (error) {
@@ -65,7 +61,7 @@ export class ConnectivityService {
   /**
    * @summary resets the service
    */
-  reset() {
+  public reset() {
     try {
       this.connected = true;
       if (this.monitorConnectionInterval) {
@@ -81,17 +77,15 @@ export class ConnectivityService {
    * @summary updates the current service statuses from all services
    * @param serviceStatusReports - service status reports for all services
    */
-  updateServicesStatusReports(serviceStatusReports: ServiceStatusReport[], timeStamp: number) {
+  public updateServicesStatusReports(pServiceStatusReports: ServiceStatusReport[], pTimeStamp: number) {
     try {
-      if (serviceStatusReports && serviceStatusReports.length > 0) {
-        serviceStatusReports.forEach(report => {
-
-          let index = this.serviceStatusReports.findIndex((p) => p.serviceName.toLowerCase() === report.serviceName.toLowerCase());
-          if (index >= 0) {
-            this.serviceStatusReports[index].update(report, timeStamp);
-          };
+      if (pServiceStatusReports && pServiceStatusReports.length > 0) {
+        pServiceStatusReports.forEach((report) => {
+          const tIndex = this.serviceStatusReports.findIndex((p) => p.serviceName.toLowerCase() === report.serviceName.toLowerCase());
+          if (tIndex >= 0) {
+            this.serviceStatusReports[tIndex].update(report, pTimeStamp);
+          }
         });
-
         this.handleServiceStatusReportsUpdate();
       }
     } catch (error) {
@@ -99,23 +93,21 @@ export class ConnectivityService {
     }
   }
 
-
-  handleEndPointServiceConnectivityChanged(connected: boolean, timestamp: number = undefined) {
+  public handleEndPointServiceConnectivityChanged(pConnected: boolean, pTimeStamp?: number) {
     try {
       let ignoreTimestamp = false;
-      let newStatusReport = new ServiceStatusReport();
+      const newStatusReport = new ServiceStatusReport();
       newStatusReport.serviceName = Constants.endpointModuleName.toLowerCase();
-      if (connected) {
+      if (pConnected) {
         newStatusReport.status = ServiceStatus.Working;
-      }
-      else {
+      } else {
         newStatusReport.status = ServiceStatus.Error;
-        if (!timestamp) {
-          timestamp = this.endpointServiceStatusReport.timestamp;
+        if (!pTimeStamp) {
+          pTimeStamp = this.endpointServiceStatusReport.timestamp;
         }
         ignoreTimestamp = true;
       }
-      this.endpointServiceStatusReport.update(newStatusReport, timestamp, ignoreTimestamp);
+      this.endpointServiceStatusReport.update(newStatusReport, pTimeStamp, ignoreTimestamp);
       this.handleServiceStatusReportsUpdate();
     } catch (error) {
       this.logger.error(error);
@@ -126,10 +118,10 @@ export class ConnectivityService {
    * @summary handle reconnecting based on the error returned from http request
    * @param {any} result - object that contains HttpErrorResponse and topic name
    */
-  handleReconnect(result: any): void {
+  public handleReconnect(pResult: any): void {
     try {
-      if (result) {
-        if (result.error.status == 408) {
+      if (pResult) {
+        if (pResult.error.status === 408) {
           this.connected = false;
           this.eventService.connectivityChanged.emit();
         } else {
@@ -145,14 +137,14 @@ export class ConnectivityService {
    * @summary check if all services are alive each 5 seconds for 2 minutes and disconnect if the one or more services are disconnected or errored
    *
    */
-  monitorConnectivty(): void {
+  public monitorConnectivty(): void {
     try {
       if (!this.monitorConnectionInterval) {
         this.monitorConnectionInterval = setInterval(() => {
           this.lastConnectivityUpdateTime = this.lastConnectivityUpdateTime ? this.lastConnectivityUpdateTime : Date.now();
-          let timeDifference: number = this.dateDiffMinutes(Date.now(), this.lastConnectivityUpdateTime);
+          const pTimeDifference: number = this.dateDiffMinutes(Date.now(), this.lastConnectivityUpdateTime);
 
-          if (timeDifference >= this.maxReconnectMinutes
+          if (pTimeDifference >= this.maxReconnectMinutes
             && this.initialized
             && this.stateService.getStatus() === InternalStatus.Connecting) {
             this.eventService.onDisconnect.emit();
@@ -169,9 +161,9 @@ export class ConnectivityService {
    * @param first first date
    * @param second second date
    */
-  dateDiffMinutes(first: number, second: number) {
+  public dateDiffMinutes(pFirst: number, pSecond: number) {
     try {
-      return Math.round((Math.abs(second - first)) / (1000 * 60));
+      return Math.round((Math.abs(pSecond - pFirst)) / (1000 * 60));
     } catch (error) {
       this.logger.error(error);
     }
@@ -179,33 +171,30 @@ export class ConnectivityService {
   /**
    * @summary handle status reports update from all endpoint
    */
-  handleServiceStatusReportsUpdate() {
+  public handleServiceStatusReportsUpdate() {
     try {
-
       if (this.endpointServiceStatusReport.status !== ServiceStatus.Working || (this.stateService.getStatus() !== InternalStatus.Connecting
         && (this.serviceStatusReports.findIndex((p) => (this.servicesToMaintain.includes(p.serviceName.toLowerCase()) && p.status !== ServiceStatus.Working)) >= 0
           || this.serviceStatusReports.findIndex((p) => this.servicesToMaintain.includes(p.serviceName.toLowerCase())) < 0))) {
         if (this.endpointServiceStatusReport.status === ServiceStatus.Working) {
-          this.logger.info("Some of the services are disconnected/errored or not sending their status. Application will go to disconnected state.");
-          this.logger.info("The following services status are reporetd from endpoint: " + JSON.stringify(this.serviceStatusReports));
-        }
-        else {
-          this.logger.info("ُEndpoint Service is disconnected. Application will go to disconnected state.");
+          this.logger.info('Some of the services are disconnected/errored or not sending their status. Application will go to disconnected state.');
+          this.logger.info('The following services status are reporetd from endpoint: ' + JSON.stringify(this.serviceStatusReports));
+        } else {
+          this.logger.info('ُEndpoint Service is disconnected. Application will go to disconnected state.');
         }
         this.connected = false;
         this.eventService.connectivityChanged.emit();
-      }
-      else {
+      } else {
         if (this.endpointServiceStatusReport.status === ServiceStatus.Working && this.stateService.getStatus() === InternalStatus.Connecting
           && (this.serviceStatusReports.findIndex((p) => (this.servicesToMaintain.includes(p.serviceName.toLowerCase()) && p.status !== ServiceStatus.Working)) < 0)) {
-          this.logger.info("All services are now connected. Application is in connected state.");
-          this.logger.info("The following services status are reporetd from endpoint: " + JSON.stringify(this.serviceStatusReports));
+          this.logger.info('All services are now connected. Application is in connected state.');
+          this.logger.info('The following services status are reporetd from endpoint: ' + JSON.stringify(this.serviceStatusReports));
           this.connected = true;
           this.eventService.connectivityChanged.emit();
         }
       }
 
-      //update connectivity time when all the services are connected
+      // update connectivity time when all the services are connected
       if (this.stateService.getStatus() !== InternalStatus.Connecting) {
         this.lastConnectivityUpdateTime = Date.now();
       }
@@ -218,7 +207,7 @@ export class ConnectivityService {
    * @summary return the connection status overall connected services
    * @returns {boolean} - true if all services are connected and false otherwise.
    */
-  isConnected(): boolean {
+  public isConnected(): boolean {
     try {
       return (this.connected);
     } catch (error) {

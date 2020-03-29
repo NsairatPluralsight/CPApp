@@ -23,79 +23,78 @@ import { CVMComponent } from '../shared/models/cvm-component';
 @Component({
   selector: 'app-main-lcd',
   templateUrl: './main-lcd.component.html',
-  styleUrls: ['./main-lcd.component.css']
+  styleUrls: ['./main-lcd.component.css'],
 })
 export class MainLCDComponent implements OnInit, OnDestroy {
-  displayedColumns = ['assigned', 'name_L1', 'number', 'direction'];
-  displayedSeriveColumns = ['assigned', 'nameL1'];
-  directionArray = ['remove', 'arrow_forward', 'arrow_back'];
-  dataSource: MatTableDataSource<Counter>;
-  dataSourceService: MatTableDataSource<Service>;
-  enablePaging: boolean;
-  mainLCDForm: FormGroup;
-  mainLCD: CVMComponent;
-  mainLCDConfiguration: MainLCDConfiguration;
-  mainLCDID: number;
-  name: string;
-  queueInfoDisplay: string;
-  counterAllocation: string;
-  identifyCaption: string;
-  displayAllOption: string;
-  customizeCounters: string;
-  assigned: string;
-  number: string;
-  direction: string;
-  cDisplayMode: string;
-  currentCustomer: string;
-  withWaitingCaption: string;
-  enablePagingCaption: string;
-  timeToWait: string;
-  displayDuration: string;
-  allServices: string;
-  customizeServices: string;
-  save: string;
-  deviceConfiguration: string;
-  saveSuccess: string;
-  changesSaved: string;
-  cancel: string;
-  languageDirection: string;
-  languageIndex: string;
-  identity: string;
-  ipAddress: string;
-  typeCaption: string;
-  branchName: string;
-  generalInfoCaption: string;
-  branchCaption: string;
-  @ViewChildren(MatSort) sorts: MatSort;
-  @ViewChildren(MatPaginator) paginator: MatPaginator;
+  public displayedColumns = ['assigned', 'name_L1', 'number', 'direction'];
+  public displayedSeriveColumns = ['assigned', 'nameL1'];
+  public directionArray = ['remove', 'arrow_forward', 'arrow_back'];
+  public dataSource: MatTableDataSource<Counter>;
+  public dataSourceService: MatTableDataSource<Service>;
+  public enablePaging: boolean;
+  public mainLCDForm: FormGroup;
+  public mainLCD: CVMComponent;
+  public mainLCDConfiguration: MainLCDConfiguration;
+  public mainLCDID: number;
+  public name: string;
+  public queueInfoDisplay: string;
+  public counterAllocation: string;
+  public identifyCaption: string;
+  public displayAllOption: string;
+  public customizeCounters: string;
+  public assigned: string;
+  public number: string;
+  public direction: string;
+  public cDisplayMode: string;
+  public currentCustomer: string;
+  public withWaitingCaption: string;
+  public enablePagingCaption: string;
+  public timeToWait: string;
+  public displayDuration: string;
+  public allServices: string;
+  public customizeServices: string;
+  public save: string;
+  public deviceConfiguration: string;
+  public saveSuccess: string;
+  public changesSaved: string;
+  public cancel: string;
+  public languageDirection: string;
+  public languageIndex: string;
+  public identity: string;
+  public ipAddress: string;
+  public typeCaption: string;
+  public branchName: string;
+  public generalInfoCaption: string;
+  public branchCaption: string;
+  @ViewChildren(MatSort) public sorts: MatSort;
+  @ViewChildren(MatPaginator) public paginator: MatPaginator;
+  public displayMode = MainLCDDisplayMode.CurrentCustomer;
+  public allServicesSelected = false;
+  public counterOption = CountersOption.All;
+  public isReady = false;
+  public disabled = false;
+  public canEdit = true;
   private subscription: Subscription;
-  displayMode = MainLCDDisplayMode.CurrentCustomer;
-  allServicesSelected = false;
-  counterOption = CountersOption.All;
-  isReady = false;
-  disabled = false;
-  canEdit = true;
 
   constructor(private route: ActivatedRoute, public mainLCDService: MainLCDService, private eventService: EventsService,
-    private fb: FormBuilder, private logger: LoggerService, public dialog: MatDialog, private stateService: StateService,
-    private languageService: MultilingualService, private cdRef: ChangeDetectorRef, private matPaginator: MatPaginatorIntl,
-    private commonService: CommonActionsService, private router: Router, private cache: CacheService) {
+              private fb: FormBuilder, private logger: LoggerService, public dialog: MatDialog, private stateService: StateService,
+              private languageService: MultilingualService, private cdRef: ChangeDetectorRef, private matPaginator: MatPaginatorIntl,
+              private commonService: CommonActionsService, private router: Router, private cache: CacheService) {
       this.listenToEvents();
   }
 
-  ngOnInit() {
+  public ngOnInit() {
     try {
       this.isReady = this.stateService.getStatus() === InternalStatus.Ready;
       this.languageDirection = this.cache.getCurrentLanguage().rtl === 1 ? Constants.cRTL : Constants.cLTR;
       this.languageIndex = this.cache.getCurrentLanguage().index;
       this.fillFormGroup();
-      this.route.params.subscribe(async params => {
+      this.route.params.subscribe(async (params) => {
         if (params && (params.pid || params.PID)) {
           this.mainLCDID = params.pid ? params.pid : params.PID;
-          let result = await this.mainLCDService.getSettings(this.mainLCDID);
-          if (result == Result.Success) {
+          const tResult = await this.mainLCDService.getSettings(this.mainLCDID);
+          if (tResult === Result.Success) {
             this.intilizeSettings();
-          } else {
           }
         }
       });
@@ -108,7 +107,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   /**
    * @summary - fills the form
    */
-  intilizeSettings(): void {
+  public intilizeSettings(): void {
     try {
       this.mainLCDConfiguration = this.mainLCDService.mainLCDConfiguration;
       this.mainLCD = this.mainLCDService.mainLCD;
@@ -130,25 +129,25 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   }
 
   /**
- * @async
- * @summary - gets the form values and save it if valid
- */
-  async saveSettings(): Promise<void> {
+   * @async
+   * @summary - gets the form values and save it if valid
+   */
+  public async saveSettings(): Promise<void> {
     try {
       if (!this.mainLCDForm.invalid && !this.disabled) {
         let isValid = true;
 
         this.mainLCDConfiguration.countersOption = this.mainLCDForm.get(Constants.cCOUNTERS_VALUE).value;
 
-        if (this.mainLCDConfiguration.countersOption == CountersOption.All) {
+        if (this.mainLCDConfiguration.countersOption === CountersOption.All) {
           this.mainLCDConfiguration.counters = [];
         } else {
-          this.mainLCDConfiguration.counters = this.dataSource.data.filter(c => c.assigned === true);
+          this.mainLCDConfiguration.counters = this.dataSource.data.filter((c) => c.assigned === true);
         }
 
         this.mainLCDConfiguration.displayMode = this.mainLCDForm.get(Constants.cPLAYER_MODE).value;
 
-        if (this.mainLCDConfiguration.displayMode == MainLCDDisplayMode.WithWaiting) {
+        if (this.mainLCDConfiguration.displayMode === MainLCDDisplayMode.WithWaiting) {
           this.mainLCDConfiguration.enablePaging = false;
 
           this.mainLCDConfiguration.allServicesSelected = this.mainLCDForm.get(Constants.cSERVICES_VALUE).value;
@@ -156,7 +155,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
           if (this.mainLCDConfiguration.allServicesSelected) {
             this.mainLCDConfiguration.services = [];
           } else {
-            this.mainLCDConfiguration.services = this.dataSourceService.data.filter(c => c.assigned === true);
+            this.mainLCDConfiguration.services = this.dataSourceService.data.filter((c) => c.assigned === true);
           }
 
         } else {
@@ -164,8 +163,8 @@ export class MainLCDComponent implements OnInit, OnDestroy {
           this.mainLCDConfiguration.enablePaging = this.enablePaging;
 
           if (this.mainLCDConfiguration.enablePaging) {
-            let tPageDuration = this.mainLCDForm.get(Constants.cPAGE_DURATION).value;
-            let tWaiteTime = this.mainLCDForm.get(Constants.cWAITE_TIME).value;
+            const tPageDuration = this.mainLCDForm.get(Constants.cPAGE_DURATION).value;
+            const tWaiteTime = this.mainLCDForm.get(Constants.cWAITE_TIME).value;
 
             if (tPageDuration > 4 && tPageDuration < 301) {
               this.mainLCDConfiguration.pageDuration = tPageDuration;
@@ -180,28 +179,28 @@ export class MainLCDComponent implements OnInit, OnDestroy {
             }
           }
         }
-        let title = this.languageService.getCaption(Constants.cSAVE_CONFIGURATION);
-        let subTitle = this.languageService.getCaption(Constants.cWRONG_DATA);
-        let message = this.languageService.getCaption(Constants.cCHECK_INPUT);
-        let cancelText = this.languageService.getCaption(Constants.cCANCEL);
-        let yesText = this.languageService.getCaption(Constants.cOK);
-        let callBack = null;
+        const tTitle = this.languageService.getCaption(Constants.cSAVE_CONFIGURATION);
+        let tSubTitle = this.languageService.getCaption(Constants.cWRONG_DATA);
+        let tMessage = this.languageService.getCaption(Constants.cCHECK_INPUT);
+        let tCancelText = this.languageService.getCaption(Constants.cCANCEL);
+        const tYesText = this.languageService.getCaption(Constants.cOK);
+        let tCallBack = null;
         if (isValid) {
-          let result = await this.mainLCDService.setConfiguration(this.mainLCDID, this.mainLCDConfiguration);
+          const result = await this.mainLCDService.setConfiguration(this.mainLCDID, this.mainLCDConfiguration);
 
-          if (result == Result.Success) {
-            subTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
-            message = this.languageService.getCaption(Constants.cSAVE_SUCCESS_MESSAGE);
-            cancelText = '';
-            callBack = this.afterSaveDialogClose;
+          if (result === Result.Success) {
+            tSubTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
+            tMessage = this.languageService.getCaption(Constants.cSAVE_SUCCESS_MESSAGE);
+            tCancelText = '';
+            tCallBack = this.afterSaveDialogClose;
           } else {
-            subTitle = this.languageService.getCaption(Constants.cSAVE_FAILED);
-            message = this.languageService.getCaption(Constants.cSAVE_FAILED_MESSAGE);
-            cancelText = '';
+            tSubTitle = this.languageService.getCaption(Constants.cSAVE_FAILED);
+            tMessage = this.languageService.getCaption(Constants.cSAVE_FAILED_MESSAGE);
+            tCancelText = '';
           }
         }
 
-        this.openDialog(title, subTitle, message, cancelText, yesText, callBack);
+        this.openDialog(tTitle, tSubTitle, tMessage, tCancelText, tYesText, tCallBack);
       }
     } catch (error) {
       this.logger.error(error);
@@ -212,9 +211,9 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @summary enable or disable page duaration and wait time inputs
    * @param display - show pagging or not
    */
-  togglePaging(display: boolean): void {
+  public togglePaging(pDisplay: boolean): void {
     try {
-      if (!display) {
+      if (!pDisplay) {
         this.mainLCDForm.get(Constants.cPAGE_DURATION).enable();
         this.mainLCDForm.get(Constants.cWAITE_TIME).enable();
       } else {
@@ -227,20 +226,20 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   }
 
   /**
- * @async
- * @summary - shows a pop up dialog with directions
- * @param {number} counterID - the id of a counter you want to set the direction for
- */
-  openDirectionsDialog(counterID: number): void {
+   * @async
+   * @summary - shows a pop up dialog with directions
+   * @param {number} counterID - the id of a counter you want to set the direction for
+   */
+  public openDirectionsDialog(tCounterID: number): void {
     try {
-      let dialogRef = this.dialog.open(DirectionComponent, {
+      const tDialogRef = this.dialog.open(DirectionComponent, {
         data: { Direction: 0 },
       });
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result && (result.Direction != null && result.Direction != undefined)) {
+      tDialogRef.afterClosed().subscribe((result) => {
+        if (result && (result.Direction != null && result.Direction !== undefined)) {
           this.dataSource.data.map((counter) => {
-            if (counter.id == counterID) {
+            if (counter.id === tCounterID) {
               counter.direction = result.Direction;
             }
           });
@@ -261,21 +260,21 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @param {string} yesText - the yes button text
    * @param {any} callBack - optional function to call after confirmation
    */
-  openDialog(title: string, subTitle: string, message: string, cancelText: string, yesText: string, callBack?: any): void {
+  public openDialog(pTitle: string, pSubTitle: string, pMessage: string, pCancelText: string, pYesText: string, pCallBack?: any): void {
     try {
-      let dialogRef = this.dialog.open(DialogComponent, {
+      const tDialogRef = this.dialog.open(DialogComponent, {
         data: {
-          title: title,
-          subTitle: subTitle,
-          message: message,
-          cancelText: cancelText,
-          yesText: yesText
-        }
+          title: pTitle,
+          subTitle: pSubTitle,
+          message: pMessage,
+          cancelText: pCancelText,
+          yesText: pYesText,
+        },
       });
 
-      dialogRef.afterClosed().subscribe((result) => {
-        if (callBack) {
-          callBack(result, this);
+      tDialogRef.afterClosed().subscribe((result) => {
+        if (pCallBack) {
+          pCallBack(result, this);
         }
       });
     } catch (error) {
@@ -287,25 +286,25 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - Initialize the main LCD Form
    */
-  fillFormGroup(): void {
+  public fillFormGroup(): void {
     try {
-      let idleTimeForPaging = 30;
-      let pageDuration = 10;
+      let tIdleTimeForPaging = 30;
+      let tPageDuration = 10;
 
       if (this.mainLCDConfiguration) {
-        idleTimeForPaging = this.mainLCDConfiguration.idleTimeForPaging;
-        pageDuration = this.mainLCDConfiguration.pageDuration;
+        tIdleTimeForPaging = this.mainLCDConfiguration.idleTimeForPaging;
+        tPageDuration = this.mainLCDConfiguration.pageDuration;
         this.counterOption = this.mainLCDConfiguration.countersOption;
         this.displayMode = this.mainLCDConfiguration.displayMode;
         this.allServicesSelected = this.mainLCDConfiguration.allServicesSelected;
       }
 
       this.mainLCDForm = this.fb.group({
-        waiteTime: [idleTimeForPaging, NumberValidators.range(5, 300)],
-        pageDuration: [pageDuration, NumberValidators.range(5, 300)],
+        waiteTime: [tIdleTimeForPaging, NumberValidators.range(5, 300)],
+        pageDuration: [tPageDuration, NumberValidators.range(5, 300)],
         countersValue: [this.counterOption],
         playerMode: [this.displayMode],
-        servicesValue: [this.allServicesSelected]
+        servicesValue: [this.allServicesSelected],
       });
     } catch (error) {
       this.logger.error(error);
@@ -316,26 +315,26 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - send commands to a specific component
    */
-  async identify(): Promise<void> {
+  public async identify(): Promise<void> {
     try {
-      let result = await this.mainLCDService.identify(this.mainLCDID);
-      if (result === Result.Success) {
-       let subTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
-       let yesText = this.languageService.getCaption(Constants.cOK);
-       let message = this.languageService.getCaption(Constants.cIDENTIFICATION_SUCCESS);
-       let title = this.languageService.getCaption(Constants.cIDENTIFY_QUEUE_INFO_DISPLAYS);
+      const tResult = await this.mainLCDService.identify(this.mainLCDID);
+      if (tResult === Result.Success) {
+       const tSubTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
+       const tYesText = this.languageService.getCaption(Constants.cOK);
+       const tMessage = this.languageService.getCaption(Constants.cIDENTIFICATION_SUCCESS);
+       const tTitle = this.languageService.getCaption(Constants.cIDENTIFY_QUEUE_INFO_DISPLAYS);
 
-       this.openDialog(title , subTitle, message, null, yesText);
+       this.openDialog(tTitle , tSubTitle, tMessage, null, tYesText);
       } else {
-        this.showError(result);
+        this.showError(tResult);
       }
     } catch (error) {
       this.logger.error(error);
     }
   }
 
-  afterSaveDialogClose(result: boolean, refrence: any) {
-    let that = refrence;
+  public afterSaveDialogClose(pResult: boolean, pRefrence: any) {
+    const that = pRefrence;
     try {
       that.router.navigate([`/${Constants.cDEVICES}`]);
     } catch (error) {
@@ -344,9 +343,9 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   }
 
   /**
-  * @summary - subscribes to Form events
-  */
-  listenToFormValueChanges(): void {
+   * @summary - subscribes to Form events
+   */
+  public listenToFormValueChanges(): void {
     try {
       this.mainLCDForm.get(Constants.cCOUNTERS_VALUE).valueChanges.subscribe((value) => {
         this.counterOption = value;
@@ -366,7 +365,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - load the captions of the component
    */
-  loadCaptions(): void {
+  public loadCaptions(): void {
     try {
       this.name = this.languageService.getCaption(Constants.cNAME);
       this.queueInfoDisplay = this.languageService.getCaption(Constants.cQUEUE_INFO_DISPLAY);
@@ -410,13 +409,13 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @summary - opens an error dialog
    * @param {number} errorCode - the code of error to get the caption
    */
-  async showError(errorCode: number, additionalMessage?: string): Promise<void> {
+  public async showError(pErrorCode: number, pAdditionalMessage?: string): Promise<void> {
     try {
-      let error = this.commonService.getErrorCaption(errorCode);
-      let additionalMessageCaption = additionalMessage ? ' ' + this.languageService.getCaption(additionalMessage) : '';
-      error += additionalMessageCaption;
+      let tError = this.commonService.getErrorCaption(pErrorCode);
+      const tAdditionalMessageCaption = pAdditionalMessage ? ' ' + this.languageService.getCaption(pAdditionalMessage) : '';
+      tError += tAdditionalMessageCaption;
 
-      await this.openDialog(Constants.cERROR, '', error, '', Constants.cOK);
+      await this.openDialog(Constants.cERROR, '', tError, '', Constants.cOK);
     } catch (error) {
       this.logger.error(error);
     }
@@ -426,7 +425,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - get if user has edit permition
    */
-  async getPermition(): Promise<void> {
+  public async getPermition(): Promise<void> {
     try {
       this.canEdit = await this.commonService.checkPermission(PermissionType.Edit);
     } catch (error) {
@@ -435,11 +434,10 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   }
 
   /**
-    * @summary - subscribes to events
-    */
-  listenToEvents(): void {
+   * @summary - subscribes to events
+   */
+  public listenToEvents(): void {
     try {
-
       this.subscription = this.eventService.statusUpdate.subscribe((state) => {
         this.isReady = state === InternalStatus.Ready;
         if (this.isReady) {
@@ -448,10 +446,10 @@ export class MainLCDComponent implements OnInit, OnDestroy {
         }
       });
 
-      const languageChangedSub = this.eventService.languageChanged.subscribe(() => { this.loadCaptions(); this.cdRef.detectChanges(); });
-      this.subscription.add(languageChangedSub);
+      const tLanguageChangedSub = this.eventService.languageChanged.subscribe(() => { this.loadCaptions(); this.cdRef.detectChanges(); });
+      this.subscription.add(tLanguageChangedSub);
 
-      const unAuthorizedActionSub = this.eventService.unAuthorizedAction.subscribe((entityName) => {
+      const tUnAuthorizedActionSub = this.eventService.unAuthorizedAction.subscribe((entityName) => {
         if (entityName) {
           if (entityName === Constants.cCOUNTER || entityName === Constants.cSERVICE) {
             this.showError(Error.NotAllowed, entityName);
@@ -461,12 +459,12 @@ export class MainLCDComponent implements OnInit, OnDestroy {
           }
         }
       });
-      this.subscription.add(unAuthorizedActionSub);
+      this.subscription.add(tUnAuthorizedActionSub);
 
-      const rebootSub = this.eventService.reboot.subscribe(() => {
+      const tRebootSub = this.eventService.reboot.subscribe(() => {
         this.ngOnInit();
       });
-      this.subscription.add(rebootSub);
+      this.subscription.add(tRebootSub);
     } catch (error) {
       this.logger.error(error);
     }
@@ -475,7 +473,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   /**
    * @summary - unsubscribe to the events
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
     } catch (error) {

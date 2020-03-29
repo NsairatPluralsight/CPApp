@@ -4,10 +4,12 @@ import { CommunicationService } from './communication.service';
 import { LoggerService } from './logger.service';
 import { Constants } from '../models/constants';
 import { CacheService } from './cache.service';
-import { loginUserData, AuthenticatedUser, RefreshTokenData } from '../models/user';
+import { LoginUserData } from '../models/user';
+import { AuthenticatedUser } from '../models/authenticated-User';
+import { RefreshTokenData } from '../models/refresh-token-data';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthenticationService {
 
@@ -19,32 +21,30 @@ export class AuthenticationService {
    * @summary - try to login to system and obtain token and refresh token
    * @returns {Promise<LoginErrorCodes>} - LoginErrorCodes enum wrapped in a promise.
    */
-  async SSOLogin(): Promise<LoginErrorCodes> {
+  public async SSOLogin(): Promise<LoginErrorCodes> {
     try {
       let result = LoginErrorCodes.Error;
+      const tPayload = {
+        applicationName: Constants.cCOMPONENT_PORTAL,
+      };
 
-      let payload = {
-        applicationName: Constants.cCOMPONENT_PORTAL
-      }
-
-      await this.communication.authenticate(Constants.cSSO_LOGIN_URL, payload, { withCredentials: true }).then(async userData => {
-        if (userData) {
-          let authUser = new AuthenticatedUser();
-          authUser.username = userData.user.username;
-          authUser.userId = userData.user.id;
-          authUser.isSSO = true;
-          authUser.token = userData.token;
-          authUser.refreshTokenData = new RefreshTokenData(userData.refreshToken, userData.token);
-          await this.setUser(authUser);
+      await this.communication.authenticate(Constants.cSSO_LOGIN_URL, tPayload, { withCredentials: true }).then(async (pUserData) => {
+        if (pUserData) {
+          const tAuthUser = new AuthenticatedUser();
+          tAuthUser.username = pUserData.user.username;
+          tAuthUser.userId = pUserData.user.id;
+          tAuthUser.isSSO = true;
+          tAuthUser.token = pUserData.token;
+          tAuthUser.refreshTokenData = new RefreshTokenData(pUserData.refreshToken, pUserData.token);
+          await this.setUser(tAuthUser);
           result = LoginErrorCodes.Success;
         }
-      }).catch(error => {
+      }).catch((error) => {
         if (error && error.code) {
           this.logger.error(error);
           result = error.code;
         }
       });
-
       return result;
     } catch (error) {
       this.logger.error(error);
@@ -53,39 +53,38 @@ export class AuthenticationService {
   }
 
   /**
- * @async
- * @summary - try to login to system and obtain token and refresh token
- * @param {string} userName - the user name used for login
- * @param {string} password - the password belong to the user
- * @returns {Promise<LoginErrorCodes>} - Result enum wrapped in a promise.
- */
-  async login(userName: string, password: string): Promise<LoginErrorCodes> {
+   * @async
+   * @summary - try to login to system and obtain token and refresh token
+   * @param {string} userName - the user name used for login
+   * @param {string} password - the password belong to the user
+   * @returns {Promise<LoginErrorCodes>} - Result enum wrapped in a promise.
+   */
+  public async login(userName: string, password: string): Promise<LoginErrorCodes> {
     try {
       let result = LoginErrorCodes.Error;
-      let user = new loginUserData();
-      user.username = userName;
-      user.password = password;
-      user.applicationName = Constants.cCOMPONENT_PORTAL;
+      const pUser = new LoginUserData();
+      pUser.username = userName;
+      pUser.password = password;
+      pUser.applicationName = Constants.cCOMPONENT_PORTAL;
 
-      await this.communication.authenticate(Constants.cLOGIN_URL, user)
-        .then(async userData => {
-          if (userData) {
-            let authUser = new AuthenticatedUser();
-            authUser.username = userData.user.username;
-            authUser.userId = userData.user.id;
-            authUser.isSSO = false;
-            authUser.token = userData.token;
-            authUser.refreshTokenData = new RefreshTokenData(userData.refreshToken, userData.token);
-            await this.setUser(authUser);
+      await this.communication.authenticate(Constants.cLOGIN_URL, pUser)
+        .then(async (pUserData) => {
+          if (pUserData) {
+            const tAuthUser = new AuthenticatedUser();
+            tAuthUser.username = pUserData.user.username;
+            tAuthUser.userId = pUserData.user.id;
+            tAuthUser.isSSO = false;
+            tAuthUser.token = pUserData.token;
+            tAuthUser.refreshTokenData = new RefreshTokenData(pUserData.refreshToken, pUserData.token);
+            await this.setUser(tAuthUser);
             result = LoginErrorCodes.Success;
           }
-        }).catch(error => {
+        }).catch((error) => {
           if (error && error.code) {
             this.logger.error(error);
             result = error.code;
           }
         });
-
       return result;
     } catch (error) {
       this.logger.error(error);
@@ -98,7 +97,7 @@ export class AuthenticationService {
    * @summary - set the Auth user and cache it
    * @param {any} user - Auth user contains credentials sent from endpoint
    */
-  async setUser(user: any): Promise<void> {
+  public async setUser(user: any): Promise<void> {
     try {
       this.cacheService.setUser(user);
       await this.communication.initialize(user.token);

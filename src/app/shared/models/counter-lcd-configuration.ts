@@ -1,5 +1,5 @@
 export class CounterLCDConfiguration {
-  counterID: number;
+  public counterID: number;
 
   constructor(id: number) {
     this.counterID = id;

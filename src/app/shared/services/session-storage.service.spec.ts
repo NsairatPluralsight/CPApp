@@ -5,16 +5,17 @@ import { EventsService } from './events.service';
 import { LoggerService } from './logger.service';
 import { Language } from '../models/language';
 import { Guid } from '../models/guid';
-import { AuthenticatedUser } from '../models/user';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 describe('SessionStorageService', () => {
   let service: SessionStorageService;
-  let mockLoggerservice, mockEventsService;
+  let mockLoggerservice;
+  let mockEventsService;
 
   mockEventsService = {
     loadDataDone: new EventEmitter(),
     logoutUser: new EventEmitter(),
-    loginUser: new EventEmitter()
+    loginUser: new EventEmitter(),
   };
 
   mockEventsService.loadDataDone = new EventEmitter();
@@ -27,10 +28,9 @@ describe('SessionStorageService', () => {
     TestBed.configureTestingModule({
       providers: [SessionStorageService,
         { provide: EventsService, useValue: mockEventsService },
-        { provide: LoggerService, useValue: mockLoggerservice }
-      ]
+        { provide: LoggerService, useValue: mockLoggerservice },
+      ],
     });
-
     service = TestBed.get(SessionStorageService);
   });
 
@@ -40,26 +40,24 @@ describe('SessionStorageService', () => {
 
   describe('storeData', () => {
     it('should store language', () => {
-      let language = new Language();
+      const language = new Language();
       language.id = 1;
-      language.caption = "English";
-
+      language.caption = 'English';
       service.storeData('language', language);
 
-      let storedLang = JSON.parse(sessionStorage.getItem('language'));
+      const storedLang = JSON.parse(sessionStorage.getItem('language'));
 
       expect(storedLang['id']).toBe(language.id);
     });
 
     it('should remove language', () => {
-      let language = new Language();
+      const language = new Language();
       language.id = 1;
-      language.caption = "English";
-
+      language.caption = 'English';
       service.storeData('language', language);
       service.storeData('language', null);
 
-      let storedLang = sessionStorage.getItem('language');
+      const storedLang = sessionStorage.getItem('language');
 
       expect(storedLang).toBe(null);
     });
@@ -67,13 +65,12 @@ describe('SessionStorageService', () => {
 
   describe('storeData', () => {
     it('should return language', () => {
-      let language = new Language();
+      const language = new Language();
       language.id = 1;
-      language.caption = "English";
-
+      language.caption = 'English';
       service.storeData('language', language);
 
-      let storedLang = service.getData('language');
+      const storedLang = service.getData('language');
 
       expect(storedLang['id']).toBe(language.id);
     });
@@ -81,7 +78,7 @@ describe('SessionStorageService', () => {
     it('should return null', () => {
       service.storeData('language', null);
 
-      let storedLang = service.getData('language');
+      const storedLang = service.getData('language');
 
       expect(storedLang).toBe(null);
     });
@@ -89,8 +86,8 @@ describe('SessionStorageService', () => {
 
   describe('getDataFromOtherTabs', () => {
     it('should call two methods', () => {
-      let setItemSpy = spyOn(localStorage, 'setItem');
-      let removeItemSpy = spyOn(localStorage, 'removeItem');
+      const setItemSpy = spyOn(localStorage, 'setItem');
+      const removeItemSpy = spyOn(localStorage, 'removeItem');
 
       service.getDataFromOtherTabs();
 
@@ -101,8 +98,8 @@ describe('SessionStorageService', () => {
 
   describe('raiseUserSessionDataAvailable', () => {
     it('should call two methods', () => {
-      let setItemSpy = spyOn(localStorage, 'setItem');
-      let removeItemSpy = spyOn(localStorage, 'removeItem');
+      const setItemSpy = spyOn(localStorage, 'setItem');
+      const removeItemSpy = spyOn(localStorage, 'removeItem');
 
       service.raiseUserSessionDataAvailable();
 
@@ -113,8 +110,8 @@ describe('SessionStorageService', () => {
 
   describe('raiseUserLogout', () => {
     it('should call two methods', () => {
-      let setItemSpy = spyOn(localStorage, 'setItem');
-      let removeItemSpy = spyOn(localStorage, 'removeItem');
+      const setItemSpy = spyOn(localStorage, 'setItem');
+      const removeItemSpy = spyOn(localStorage, 'removeItem');
 
       service.raiseUserLogout();
 
@@ -125,8 +122,8 @@ describe('SessionStorageService', () => {
 
   describe('raiseUserLogin', () => {
     it('should call two methods', () => {
-      let setItemSpy = spyOn(localStorage, 'setItem');
-      let removeItemSpy = spyOn(localStorage, 'removeItem');
+      const setItemSpy = spyOn(localStorage, 'setItem');
+      const removeItemSpy = spyOn(localStorage, 'removeItem');
 
       service.raiseUserLogin();
 
@@ -137,8 +134,8 @@ describe('SessionStorageService', () => {
 
   describe('raiseUserTokenRefreshed', () => {
     it('should call two methods', () => {
-      let setItemSpy = spyOn(localStorage, 'setItem');
-      let removeItemSpy = spyOn(localStorage, 'removeItem');
+      const setItemSpy = spyOn(localStorage, 'setItem');
+      const removeItemSpy = spyOn(localStorage, 'removeItem');
 
       service.raiseUserTokenRefreshed();
 
@@ -148,48 +145,44 @@ describe('SessionStorageService', () => {
   });
 
   describe('storageEventListener', () => {
-
     it('should call raiseUserSessionDataAvailable', () => {
-      let spy = spyOn(service, 'raiseUserSessionDataAvailable');
-      let event = {
+      const spy = spyOn(service, 'raiseUserSessionDataAvailable');
+      const event = {
         key: 'getUserInitialData',
-        newValue: new Guid(mockLoggerservice).getGuid()
+        newValue: new Guid(mockLoggerservice).getGuid(),
       } as StorageEvent;
 
-      service.storageEventListener(event)
+      service.storageEventListener(event);
 
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('should emit loadDataDone', () => {
-      let spy = spyOn(mockEventsService.loadDataDone, 'emit');
-      let event = {
+      const spy = spyOn(mockEventsService.loadDataDone, 'emit');
+      const event = {
         key: 'getUserInitialData',
-        newValue: new Guid(mockLoggerservice).getGuid()
+        newValue: new Guid(mockLoggerservice).getGuid(),
       } as StorageEvent;
-
       service.guid = event.newValue;
-      service.storageEventListener(event)
+
+      service.storageEventListener(event);
 
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('should call loadDataDone after calling storeData', () => {
-      let loadDataDoneSpy = spyOn(mockEventsService.loadDataDone, 'emit');
-      let storeDataSpy = spyOn(service, 'storeData');
-
-      let object = {
-        user: JSON.stringify(new AuthenticatedUser().token = 'testToke')
+      const loadDataDoneSpy = spyOn(mockEventsService.loadDataDone, 'emit');
+      const storeDataSpy = spyOn(service, 'storeData');
+      const object = {
+        user: JSON.stringify(new AuthenticatedUser().token = 'testToke'),
       };
-
-      let data = {
+      const data = {
         source: new Guid(mockLoggerservice).getGuid(),
-        sessionStorage: object
+        sessionStorage: object,
       };
-
-      let event = {
+      const event = {
         key: 'userInitialData',
-        newValue: JSON.stringify(data)
+        newValue: JSON.stringify(data),
       } as StorageEvent;
 
       service.storageEventListener(event);
@@ -199,21 +192,18 @@ describe('SessionStorageService', () => {
     });
 
     it('should call logoutUser after calling storeData', () => {
-      let logoutUserSpy = spyOn(mockEventsService.logoutUser, 'emit');
-      let storeDataSpy = spyOn(service, 'storeData');
-
-      let object = {
-        user: JSON.stringify(new AuthenticatedUser().token = 'testToke')
+      const logoutUserSpy = spyOn(mockEventsService.logoutUser, 'emit');
+      const storeDataSpy = spyOn(service, 'storeData');
+      const object = {
+        user: JSON.stringify(new AuthenticatedUser().token = 'testToke'),
       };
-
-      let data = {
+      const data = {
         source: new Guid(mockLoggerservice).getGuid(),
-        sessionStorage: object
+        sessionStorage: object,
       };
-
-      let event = {
+      const event = {
         key: 'userLogout',
-        newValue: JSON.stringify(data)
+        newValue: JSON.stringify(data),
       } as StorageEvent;
 
       service.storageEventListener(event);
@@ -223,21 +213,18 @@ describe('SessionStorageService', () => {
     });
 
     it('should call loginUser after calling storeData', () => {
-      let loginUserSpy = spyOn(mockEventsService.loginUser, 'emit');
-      let storeDataSpy = spyOn(service, 'storeData');
-
-      let object = {
-        user: JSON.stringify(new AuthenticatedUser().token = 'testToke')
+      const loginUserSpy = spyOn(mockEventsService.loginUser, 'emit');
+      const storeDataSpy = spyOn(service, 'storeData');
+      const object = {
+        user: JSON.stringify(new AuthenticatedUser().token = 'testToke'),
       };
-
-      let data = {
+      const data = {
         source: new Guid(mockLoggerservice).getGuid(),
-        sessionStorage: object
+        sessionStorage: object,
       };
-
-      let event = {
+      const event = {
         key: 'userLogin',
-        newValue: JSON.stringify(data)
+        newValue: JSON.stringify(data),
       } as StorageEvent;
 
       service.storageEventListener(event);
@@ -249,16 +236,15 @@ describe('SessionStorageService', () => {
 
   describe('isDifferentSessionStorage', () => {
     it('should return true', () => {
-      let newSession = { 'what': 'the matter' };
+      const newSession = { what: 'the matter' };
       sessionStorage.setItem('test', 'new');
-
-      let result = service.isDifferentSessionStorage(newSession);
+      const result = service.isDifferentSessionStorage(newSession);
 
       expect(result).toBe(true);
     });
 
     it('should return false', () => {
-      let result = service.isDifferentSessionStorage(null);
+      const result = service.isDifferentSessionStorage(null);
 
       expect(result).toBe(false);
     });

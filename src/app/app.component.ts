@@ -9,10 +9,9 @@ import { CacheService } from './shared/services/cache.service';
 import { Router } from '@angular/router';
 import { SessionStorageService } from './shared/services/session-storage.service';
 import { CommunicationService } from './shared/services/communication.service';
-import { Subscription } from "rxjs";
+import { Subscription } from 'rxjs';
 import { Constants } from './shared/models/constants';
 import { ConnectivityService } from './shared/services/connectivity.service';
-import { AuthenticationService } from './shared/services/authentication.service';
 
 @Component({
   selector: 'app-root',
@@ -20,19 +19,19 @@ import { AuthenticationService } from './shared/services/authentication.service'
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit, OnDestroy {
+  public connectingCaption: string;
+  public title: string;
+  public direction = Constants.cLTR;
+  public showConnecting = false;
   private subscription: Subscription;
-  connectingCaption: string;
-  title: string;
-  direction = Constants.cLTR;
-  showConnecting = false;
 
   constructor(private logger: LoggerService, private router: Router, private communicationService: CommunicationService,
-    private eventsService: EventsService, private stateService: StateService, private cacheService: CacheService,
-    private session: SessionStorageService, private connectivityService: ConnectivityService, public languageService: MultilingualService) {
+              private eventsService: EventsService, private stateService: StateService, private cacheService: CacheService,
+              private session: SessionStorageService, private connectivityService: ConnectivityService, public languageService: MultilingualService) {
     this.listenToEvents();
   }
 
-  async ngOnInit(): Promise<void> {
+  public async ngOnInit(): Promise<void> {
     try {
       this.stateService.setStatus(InternalStatus.Ready);
       await this.languageService.initialize();
@@ -46,7 +45,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @summary - logout user and inform others
    * @param queryParams - oprional to send query string with url
    */
-  logout(queryParams?: any): void {
+  public logout(queryParams?: any): void {
     try {
       this.session.raiseUserLogout();
       this.handleLogout(queryParams);
@@ -59,7 +58,7 @@ export class AppComponent implements OnInit, OnDestroy {
    * @summary - delete user info and redirect to login page
    * @param queryParams - oprional to send query string with url
    */
-  handleLogout(queryParams?: any): void {
+  public handleLogout(queryParams?: any): void {
     try {
       this.communicationService.logout();
       this.connectivityService.reset();
@@ -77,9 +76,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
-  * @summary - subscribes to events
-  */
-  listenToEvents(): void {
+   * @summary - subscribes to events
+   */
+  public listenToEvents(): void {
     try {
       this.subscription = this.eventsService.languageChanged.subscribe((language: Language) => {
         this.direction = language.rtl === 1 ? Constants.cRTL : Constants.cLTR;
@@ -93,7 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.subscription.add(unAuthenticatedSub);
 
       const setUserSub = this.eventsService.setUser.subscribe((user) => {
-        let oldUserData = this.cacheService.getUser();
+        const oldUserData = this.cacheService.getUser();
         user[Constants.cPERMISSION] = oldUserData.permission;
         this.cacheService.setUser(user);
       });
@@ -123,7 +122,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.subscription.add(disconnect);
 
       const envStatusChanged = this.eventsService.connectivityChanged.subscribe(() => {
-        let isConnected = this.connectivityService.isConnected();
+        const isConnected = this.connectivityService.isConnected();
 
         if (isConnected) {
           this.showConnecting = false;
@@ -144,7 +143,7 @@ export class AppComponent implements OnInit, OnDestroy {
   /**
    * @summary - get the text caption for the component
    */
-  loadCaptions(): void {
+  public loadCaptions(): void {
     try {
       this.connectingCaption = this.languageService.getCaption(Constants.cCONNECTING);
       this.title = this.languageService.getCaption(Constants.cCOMPONENT_PORTAL);
@@ -154,9 +153,9 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   /**
- * @summary - unsubscribe to the events
- */
-  ngOnDestroy(): void {
+   * @summary - unsubscribe to the events
+   */
+  public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
     } catch (error) {

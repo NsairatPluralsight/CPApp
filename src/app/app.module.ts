@@ -28,9 +28,9 @@ import { SharedModule } from './shared/shared.module';
     CounterLcdModule,
     BrowserAnimationsModule,
     ErrorModule,
-    SharedModule
+    SharedModule,
   ],
   providers: [RouterModule],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

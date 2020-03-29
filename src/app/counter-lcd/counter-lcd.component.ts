@@ -11,59 +11,53 @@ import { CounterLCDConfiguration } from '../shared/models/counter-lcd-configurat
 import { MultilingualService } from '../shared/services/multilingual.service';
 import { MatDialog } from '@angular/material';
 import { DialogComponent } from '../shared/components/dialog.component';
-import { Subscription } from "rxjs";
+import { Subscription } from 'rxjs';
 import { Constants } from '../shared/models/constants';
 import { CommonActionsService } from '../shared/services/common-actions.service';
 
 @Component({
   selector: 'app-counter-lcd',
   templateUrl: './counter-lcd.component.html',
-  styleUrls: ['./counter-lcd.component.css']
+  styleUrls: ['./counter-lcd.component.css'],
 })
 export class CounterLCDComponent implements OnInit, OnDestroy {
-  countersForm: FormGroup;
-  counters: Counter[];
-  counterLCDConfiguration: CounterLCDConfiguration;
-  counter_LCD_ID: number;
-  save: string;
-  identifyCaption: string;
-  title: string;
-  forCounter: string;
+  public countersForm: FormGroup;
+  public counters: Counter[];
+  public counterLCDConfiguration: CounterLCDConfiguration;
+  public counter_LCD_ID: number;
+  public save: string;
+  public identifyCaption: string;
+  public title: string;
+  public forCounter: string;
+  public disabled = false;
+  public isReady = false;
+  public canEdit = true;
   private subscription: Subscription;
-  disabled = false;
-  isReady = false;
-  canEdit = true;
 
   constructor(private logger: LoggerService, private fb: FormBuilder, private counterServices: CounterLCDService,
-    private languageService: MultilingualService, private eventService: EventsService, private cdRef: ChangeDetectorRef,
-    private stateService: StateService, private route: ActivatedRoute, public dialog: MatDialog, private commonService: CommonActionsService) {
+              private languageService: MultilingualService, private eventService: EventsService, private cdRef: ChangeDetectorRef,
+              private stateService: StateService, private route: ActivatedRoute, public dialog: MatDialog, private commonService: CommonActionsService) {
       this.listenToEvents();
   }
 
-  async ngOnInit(): Promise<void> {
+  public async ngOnInit(): Promise<void> {
     try {
       this.isReady = this.stateService.getStatus() === InternalStatus.Ready;
       this.fillFormGroup(0);
-
       await this.getPermition();
 
-      this.route.params.subscribe(async params => {
+      this.route.params.subscribe(async (params) => {
         if (params && (params.pid || params.PID)) {
           this.counter_LCD_ID = params.pid ? params.pid : params.PID;
-          let result = await this.counterServices.getSettings(this.counter_LCD_ID);
+          const result = await this.counterServices.getSettings(this.counter_LCD_ID);
 
-          if (result == Result.Success) {
-
+          if (result === Result.Success) {
             this.counters = this.counterServices.counters;
-            this.counterLCDConfiguration = this.counterServices.counterLCDConfiguration
+            this.counterLCDConfiguration = this.counterServices.counterLCDConfiguration;
             this.fillFormGroup(this.counterLCDConfiguration.counterID);
-
-          } else {
-
           }
         }
       });
-
       this.loadCaptions();
     } catch (error) {
       this.logger.error(error);
@@ -75,10 +69,10 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
    * @summary - Initialize the counters form
    * @param {number} id - selected counter ID
    */
-  async fillFormGroup(id: number): Promise<void> {
+  public async fillFormGroup(id: number): Promise<void> {
     try {
       this.countersForm = this.fb.group({
-        counter: [id]
+        counter: [id],
       });
     } catch (error) {
       this.logger.error(error);
@@ -89,9 +83,9 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - send commands to a specific component
    */
-  async identify(): Promise<void> {
+  public async identify(): Promise<void> {
     try {
-      let result = await this.counterServices.identify(this.counter_LCD_ID);
+      const tResult = await this.counterServices.identify(this.counter_LCD_ID);
     } catch (error) {
       this.logger.error(error);
     }
@@ -101,35 +95,32 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - gets the form values and save it if valid
    */
-  async saveConfiguration(): Promise<void> {
+  public async saveConfiguration(): Promise<void> {
     try {
-      let title = this.languageService.getCaption(Constants.cSAVE_CONFIGURATION);
-      let subTitle = this.languageService.getCaption(Constants.cWRONG_DATA);
-      let message = this.languageService.getCaption(Constants.cCHECK_INPUT);
-      let cancelText = this.languageService.getCaption(Constants.cCANCEL);
-      let yesText = this.languageService.getCaption(Constants.cOK);
-      let callBack = null;
+      const tTitle = this.languageService.getCaption(Constants.cSAVE_CONFIGURATION);
+      let tSubTitle = this.languageService.getCaption(Constants.cWRONG_DATA);
+      let tMessage = this.languageService.getCaption(Constants.cCHECK_INPUT);
+      let tCancelText = this.languageService.getCaption(Constants.cCANCEL);
+      const tYesText = this.languageService.getCaption(Constants.cOK);
+      let tCallBack = null;
 
-      let counterID = this.countersForm.get(Constants.cCOUNTER).value;
+      const counterID = this.countersForm.get(Constants.cCOUNTER).value;
       if (!this.disabled && this.canEdit && counterID && counterID > 0) {
-
         this.counterLCDConfiguration.counterID = counterID;
-        let result = await this.counterServices.setConfiguration(this.counter_LCD_ID, this.counterLCDConfiguration);
+        const result = await this.counterServices.setConfiguration(this.counter_LCD_ID, this.counterLCDConfiguration);
 
-        if (result == Result.Success) {
-          subTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
-          message = this.languageService.getCaption(Constants.cSAVE_SUCCESS_MESSAGE);
-          cancelText = '';
-          callBack = this.afterSaveDialogClose;
+        if (result === Result.Success) {
+          tSubTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
+          tMessage = this.languageService.getCaption(Constants.cSAVE_SUCCESS_MESSAGE);
+          tCancelText = '';
+          tCallBack = this.afterSaveDialogClose;
         } else {
-          subTitle = this.languageService.getCaption(Constants.cSAVE_FAILED);
-          message = this.languageService.getCaption(Constants.cSAVE_FAILED_MESSAGE);
-          cancelText = '';
+          tSubTitle = this.languageService.getCaption(Constants.cSAVE_FAILED);
+          tMessage = this.languageService.getCaption(Constants.cSAVE_FAILED_MESSAGE);
+          tCancelText = '';
         }
       }
-
-      await this.openDialog(title, subTitle, message, cancelText, yesText, callBack);
-
+      await this.openDialog(tTitle, tSubTitle, tMessage, tCancelText, tYesText, tCallBack);
     } catch (error) {
       this.logger.error(error);
     }
@@ -145,21 +136,21 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
    * @param {string} yesText - the yes button text
    * @param {any} callBack - optional function to call after confirmation
    */
-  async openDialog(title: string, subTitle: string, message: string, cancelText: string, yesText: string, callBack?: any): Promise<void> {
+  public async openDialog(pTitle: string, pSubTitle: string, pMessage: string, pCancelText: string, pYesText: string, pCallBack?: any): Promise<void> {
     try {
-      let dialogRef = this.dialog.open(DialogComponent, {
+      const dialogRef = this.dialog.open(DialogComponent, {
         data: {
-          title: title,
-          subTitle: subTitle,
-          message: message,
-          cancelText: cancelText,
-          yesText: yesText
-        }
+          title: pTitle,
+          subTitle: pSubTitle,
+          message: pMessage,
+          cancelText: pCancelText,
+          yesText: pYesText,
+        },
       });
 
       dialogRef.afterClosed().subscribe((result) => {
-        if (callBack) {
-          callBack(result);
+        if (pCallBack) {
+          pCallBack(result);
         }
       });
     } catch (error) {
@@ -167,13 +158,12 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
     }
   }
 
-  async afterSaveDialogClose(result: boolean): Promise<void> {
+  public async afterSaveDialogClose(result: boolean): Promise<void> {
     try {
+      // tslint:disable: no-console
       console.log('inside the callback');
       if (result) {
         console.log(result);
-      } else {
-
       }
     } catch (error) {
       this.logger.error(error);
@@ -184,7 +174,7 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - load the captions of the component
    */
-  async loadCaptions(): Promise<void> {
+  public async loadCaptions(): Promise<void> {
     try {
       this.save = this.languageService.getCaption(Constants.cSAVE);
       this.identifyCaption = this.languageService.getCaption(Constants.cIDENTIFY);
@@ -199,7 +189,7 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - get if user has edit permition
    */
-  async getPermition(): Promise<void> {
+  public async getPermition(): Promise<void> {
     try {
       this.canEdit = await this.commonService.checkPermission(PermissionType.Edit);
     } catch (error) {
@@ -208,28 +198,27 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
   }
 
   /**
-  * @async
-  * @summary - opens an error dialog
-  * @param {number} errorCode - the code of error to get the caption
-  */
-  async showError(errorCode: number, additionalMessage?: string): Promise<void> {
+   * @async
+   * @summary - opens an error dialog
+   * @param {number} errorCode - the code of error to get the caption
+   */
+  public async showError(pErrorCode: number, pAdditionalMessage?: string): Promise<void> {
     try {
-      let error = this.commonService.getErrorCaption(errorCode);
-      let additionalMessageCaption = additionalMessage ? ' ' + this.languageService.getCaption(additionalMessage) : '';
-      error += additionalMessageCaption;
+      let tError = this.commonService.getErrorCaption(pErrorCode);
+      const additionalMessageCaption = pAdditionalMessage ? ' ' + this.languageService.getCaption(pAdditionalMessage) : '';
+      tError += additionalMessageCaption;
 
-      await this.openDialog(Constants.cERROR, '', error, '', Constants.cOK);
+      await this.openDialog(Constants.cERROR, '', tError, '', Constants.cOK);
     } catch (error) {
       this.logger.error(error);
     }
   }
 
   /**
-    * @summary - subscribes to events
-    */
-  listenToEvents(): void {
+   * @summary - subscribes to events
+   */
+  public listenToEvents(): void {
     try {
-
       this.subscription = this.eventService.statusUpdate.subscribe((state) => {
         this.isReady = state === InternalStatus.Ready;
         if (this.isReady) {
@@ -238,31 +227,27 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
         }
       });
 
-      const languageChangedSub = this.eventService.languageChanged.subscribe(() => {
+      const tLanguageChangedSub = this.eventService.languageChanged.subscribe(() => {
         this.loadCaptions();
         if (!this.cdRef[Constants.cDESTROYED]) {
           this.cdRef.detectChanges();
         }
       });
+      this.subscription.add(tLanguageChangedSub);
 
-      this.subscription.add(languageChangedSub);
-
-      const unAuthorizedActionSub = this.eventService.unAuthorizedAction.subscribe((entityName) => {
+      const tUnAuthorizedActionSub = this.eventService.unAuthorizedAction.subscribe((entityName) => {
         if (entityName && entityName === Constants.cCOUNTER) {
           this.showError(Error.NotAllowed, Constants.cCOUNTER);
           this.disabled = true;
           this.counterLCDConfiguration = new CounterLCDConfiguration(0);
         }
       });
+      this.subscription.add(tUnAuthorizedActionSub);
 
-      this.subscription.add(unAuthorizedActionSub);
-
-      const rebootSub = this.eventService.reboot.subscribe(() => {
+      const tRebootSub = this.eventService.reboot.subscribe(() => {
         this.ngOnInit();
       });
-
-      this.subscription.add(rebootSub);
-
+      this.subscription.add(tRebootSub);
     } catch (error) {
       this.logger.error(error);
     }
@@ -271,7 +256,7 @@ export class CounterLCDComponent implements OnInit, OnDestroy {
   /**
    * @summary - unsubscribe to the events
    */
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
     } catch (error) {

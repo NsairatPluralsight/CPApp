@@ -9,22 +9,24 @@ import { EventsService } from './events.service';
 import { LoggerService } from './logger.service';
 import { CommunicationService } from './communication.service';
 import { CacheService } from './cache.service';
-import { AuthenticatedUser, loginUserData, RefreshTokenData } from '../models/user';
 import { Result } from '../models/enum';
+import { AuthenticatedUser } from '../models/authenticated-User';
+import { RefreshTokenData } from '../models/refresh-token-data';
 
 describe('CommunicationManagerService', () => {
-  let service: CommunicationManagerService
-  let mockLoggerservice, mockCacheService;
+  let service: CommunicationManagerService;
+  let mockLoggerservice;
+  let mockCacheService;
 
-  let mockEventsService = {
+  const mockEventsService = {
     unAuthorized: new EventEmitter(),
     unAuthorizedAction: new EventEmitter(),
   };
   mockEventsService.unAuthorized = new EventEmitter();
   mockEventsService.unAuthorizedAction = new EventEmitter();
 
-  let config = {
-    IPAddress: "10.0.0.24",
+  const config = {
+    IPAddress: '10.0.0.24',
     allServicesSelected: true,
     counters: [
       {
@@ -32,38 +34,38 @@ describe('CommunicationManagerService', () => {
         direction: 1,
         hall_ID: 117,
         id: 118,
-        name_L1: "C1",
-        name_L2: "C1",
-        name_L3: "",
-        name_L4: "",
+        name_L1: 'C1',
+        name_L2: 'C1',
+        name_L3: '',
+        name_L4: '',
         number: 1,
-        queueBranch_ID: 115
+        queueBranch_ID: 115,
       }, {
         assigned: true,
         direction: 1,
         hall_ID: 117,
         id: 131,
-        name_L1: "C2",
-        name_L2: "C2",
-        name_L3: "",
-        name_L4: "",
+        name_L1: 'C2',
+        name_L2: 'C2',
+        name_L3: '',
+        name_L4: '',
         number: 2,
-        queueBranch_ID: 115
+        queueBranch_ID: 115,
       },
       {
         assigned: true,
         direction: 2,
         hall_ID: 144,
         id: 145,
-        name_L1: "B2 C1",
-        name_L2: "?2 ?1",
-        name_L3: "",
-        name_L4: "",
+        name_L1: 'B2 C1',
+        name_L2: '?2 ?1',
+        name_L3: '',
+        name_L4: '',
         number: 1,
-        queueBranch_ID: 142
+        queueBranch_ID: 142,
       }],
     countersOption: 1,
-    description: "15tlc",
+    description: '15tlc',
     enable: true,
     enablePaging: true,
     identifier: 170,
@@ -71,33 +73,33 @@ describe('CommunicationManagerService', () => {
     idleTimeForPaging: 50,
     pageDuration: 60,
     services: [],
-    withWaiting: false
-  }
-  let mainLCD = [{
+    withWaiting: false,
+  };
+  const mainLCD = [{
     queueBranch_ID: 115,
     configuration: JSON.stringify(config),
     id: 1,
-    name_L1: "P15",
-    name_L2: "?15",
-    name_L3: "",
-    name_L4: "",
+    name_L1: 'P15',
+    name_L2: '?15',
+    name_L3: '',
+    name_L4: '',
     orgID: 1,
-    relatedClass: "Player",
+    relatedClass: 'Player',
     relatedObjectID: 170,
-    report: "[]",
-    type: 2
+    report: '[]',
+    type: 2,
   }];
 
-  let jsonMainLCD = JSON.stringify(mainLCD);
+  const jsonMainLCD = JSON.stringify(mainLCD);
 
-  let mockCommService = {
+  const mockCommService = {
     async post(payload: any, topicName: string) {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.topicName = topicName;
       reqMessage.payload = payload;
 
-      let topicArray = topicName.split('/');
+      const topicArray = topicName.split('/');
 
       if (topicArray[0] === 'ComponentService') {
         let payloadData: any;
@@ -116,7 +118,7 @@ describe('CommunicationManagerService', () => {
             };
             break;
           case 'Manager.GetComponentType':
-            let array = new Array<CVMComponentType>();
+            const array = new Array<CVMComponentType>();
             array.push(new CVMComponentType());
             payloadData = JSON.stringify(array);
 
@@ -126,8 +128,8 @@ describe('CommunicationManagerService', () => {
             };
             break;
           case 'Configuration.GetConfig':
-            let config = new CounterLCDConfiguration(1);
-            let data = [{ Configuration: JSON.stringify(config) }];
+            const tConfig = new CounterLCDConfiguration(1);
+            const data = [{ Configuration: JSON.stringify(tConfig) }];
             payloadData = JSON.stringify(data);
 
             reqMessage.payload = {
@@ -138,14 +140,14 @@ describe('CommunicationManagerService', () => {
           case 'Manager.ExecuteCommand':
           case 'Configuration.SetConfig':
             reqMessage.payload = {
-              result: 0
+              result: 0,
             };
             break;
         }
       } else {
         switch (topicArray[1]) {
           case 'getBranches':
-            let branches = new Array<Branch>();
+            const branches = new Array<Branch>();
             branches.push(new Branch(1, 'B1'));
             branches.push(new Branch(2, 'B2'));
             reqMessage.payload = {
@@ -154,26 +156,26 @@ describe('CommunicationManagerService', () => {
             };
             break;
           case 'getCounters':
-            let counters = [
+            const counters = [
               { id: 120, Name_L1: 'Counter 1', Name_L2: 'النافذة 1', Name_L3: 'Counter 1', Name_L4: '', Number: 0 },
               { id: 121, Name_L1: 'Counter 2', Name_L2: 'النافذة 2', Name_L3: 'Counter 2', Name_L4: '', Number: 0 },
               { id: 605, Name_L1: 'Counter 5', Name_L2: 'Counter 5', Name_L3: 'Counter 5', Name_L4: '', Number: 0 },
               { id: 606, Name_L1: 'Counter 6', Name_L2: 'Counter 6', Name_L3: 'Counter 6', Name_L4: '', Number: 0 },
-              { id: 607, Name_L1: 'Counter 7', Name_L2: 'Counter 7', Name_L3: 'Counter 7', Name_L4: '', Number: 0 }
+              { id: 607, Name_L1: 'Counter 7', Name_L2: 'Counter 7', Name_L3: 'Counter 7', Name_L4: '', Number: 0 },
             ];
             reqMessage.payload = {
-              data:[counters],
+              data: [counters],
               result: 0,
             };
             break;
           case 'getServices':
-            let services = [
+            const services = [
               { id: 113, Name_L1: 'Service 1', Name_L2: 'خدمة 1', Name_L3: 'Service 1', Name_L4: '' },
               { id: 114, Name_L1: 'Service 2', Name_L2: 'خدمة 2', Name_L3: 'Service 2', Name_L4: '' },
               { id: 159, Name_L1: 'Service 3', Name_L2: 'الخدمة 3', Name_L3: 'Service 3', Name_L4: '' },
               { id: 364, Name_L1: 'Service4', Name_L2: 'Service4', Name_L3: 'Service4', Name_L4: '' },
               { id: 366, Name_L1: 'Clearing Cheque', Name_L2: 'شيكات مقاصة', Name_L3: '', Name_L4: 'Clearing Cheque' },
-              { id: 368, Name_L1: 'Bill Payment', Name_L2: 'دفع فواتير', Name_L3: 'Bill Payment', Name_L4: '' }
+              { id: 368, Name_L1: 'Bill Payment', Name_L2: 'دفع فواتير', Name_L3: 'Bill Payment', Name_L4: '' },
             ];
             reqMessage.payload = {
               data: [services],
@@ -185,17 +187,17 @@ describe('CommunicationManagerService', () => {
       return reqMessage;
     },
     async anonymousPost(payload: any, topicName: string) {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.topicName = topicName;
       reqMessage.payload = payload;
 
-      let languages = [{
+      const languages = [{
         orgId: 1,
         languages: [
-          { "id": 1, "caption": "English", "index": 1, "prefix": "en-US", "rtl": 0 },
-          { "id": 2, "caption": "عربي", "index": 2, "prefix": "ar-SA", "rtl": 1 }
-        ]
+          { id: 1, caption: 'English', index: 1, prefix: 'en-US', rtl: 0 },
+          { id: 2, caption: 'عربي', index: 2, prefix: 'ar-SA', rtl: 1 },
+        ],
       }];
       reqMessage.payload = {
         data: [languages],
@@ -204,25 +206,26 @@ describe('CommunicationManagerService', () => {
 
       return reqMessage;
     },
-    getFile() { }
+    // tslint:disable-next-line: no-empty
+    getFile() {},
   };
 
   mockCacheService = {
     getCurrentLanguage() {
-      let Language = {
+      const tLanguage = {
         id: 1,
         caption: 'ENGLISH',
         index: 2,
         prefix: 'EN',
-        rtl: 0
+        rtl: 0,
       };
-      return Language;
+      return tLanguage;
     },
     getUser() {
-      let authUser = new AuthenticatedUser();
+      const authUser = new AuthenticatedUser();
       authUser.userId = 1;
       authUser.username = 'Nsairat';
-      authUser.refreshTokenData = new RefreshTokenData("refreshToken", "token")
+      authUser.refreshTokenData = new RefreshTokenData('refreshToken', 'token');
       authUser.token = 'test';
       return authUser;
     },
@@ -237,7 +240,7 @@ describe('CommunicationManagerService', () => {
         { provide: LoggerService, useValue: mockLoggerservice },
         { provide: CommunicationService, useValue: mockCommService },
         { provide: CacheService, useValue: mockCacheService },
-      ]
+      ],
     });
 
     service = TestBed.get(CommunicationManagerService);
@@ -250,30 +253,30 @@ describe('CommunicationManagerService', () => {
   describe('getBranches', () => {
 
     it('should return two Branches', async () => {
-      let result = await service.getBranches();
+      const result = await service.getBranches();
 
       expect(result.length).toBe(2);
     });
 
     it('should return null', inject([CacheService], async (cache: CacheService) => {
-      spyOn(cache, 'getCurrentLanguage').and.callFake(() => { return null });
+      spyOn(cache, 'getCurrentLanguage').and.callFake(() => null);
 
-      let result = await service.getBranches();
+      const result = await service.getBranches();
 
       expect(result).toBe(null);
     }));
 
     it('should emit unAuthorizedAction', inject([CommunicationService], async (communication: CommunicationService) => {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.payload = {
         data: null,
         result: -3,
       };
-      spyOn(communication, 'post').and.callFake(async () => { return reqMessage });
-      let spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
+      spyOn(communication, 'post').and.callFake(async () => reqMessage);
+      const spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
 
-      let result = await service.getBranches();
+      const result = await service.getBranches();
 
       expect(result).toBe(null);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -282,15 +285,15 @@ describe('CommunicationManagerService', () => {
 
   describe('getComponent', () => {
     it('should return Component', async () => {
-      let result = await service.getComponent(115);
+      const result = await service.getComponent(115);
 
       expect(result.length).toBe(1);
     });
 
     it('should return null', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'post').and.callFake(async () => { return null });
+      spyOn(communication, 'post').and.callFake(async () => null);
 
-      let result = await service.getComponent(115);
+      const result = await service.getComponent(115);
 
       expect(result).toBe(null);
     }));
@@ -298,15 +301,15 @@ describe('CommunicationManagerService', () => {
 
   describe('getComponentsCount', () => {
     it('should return Components count', async () => {
-      let result = await service.getComponentsCount(115);
+      const result = await service.getComponentsCount(115);
 
       expect(result).toBe(5);
     });
 
     it('should return null', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'post').and.callFake(async () => { return null });
+      spyOn(communication, 'post').and.callFake(async () => null);
 
-      let result = await service.getComponentsCount(115);
+      const result = await service.getComponentsCount(115);
 
       expect(result).toBe(null);
     }));
@@ -314,15 +317,15 @@ describe('CommunicationManagerService', () => {
 
   describe('getComponentTypes', () => {
     it('should return Component Types', async () => {
-      let result = await service.getComponentTypes();
+      const result = await service.getComponentTypes();
 
       expect(result.length).toBe(1);
     });
 
     it('should return null', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'post').and.callFake(async () => { return null });
+      spyOn(communication, 'post').and.callFake(async () => null);
 
-      let result = await service.getComponentTypes();
+      const result = await service.getComponentTypes();
 
       expect(result).toBe(null);
     }));
@@ -330,28 +333,28 @@ describe('CommunicationManagerService', () => {
 
   describe('getCounters', () => {
     it('should return Counters', async () => {
-      let result = await service.getCounters(115);
+      const result = await service.getCounters(115);
 
       expect(result.length).toBe(5);
     });
 
     it('should return null', async () => {
-      let result = await service.getCounters(null);
+      const result = await service.getCounters(null);
 
       expect(result).toBe(null);
     });
 
     it('should emit unAuthorizedAction', inject([CommunicationService], async (communication: CommunicationService) => {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.payload = {
         data: null,
         result: -3,
       };
-      spyOn(communication, 'post').and.callFake(async () => { return reqMessage });
-      let spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
+      spyOn(communication, 'post').and.callFake(async () => reqMessage);
+      const spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
 
-      let result = await service.getCounters(115);
+      const result = await service.getCounters(115);
 
       expect(result).toBe(null);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -360,30 +363,30 @@ describe('CommunicationManagerService', () => {
 
   describe('getServices', () => {
     it('should return services', async () => {
-      let result = await service.getServices([1, 2, 3]);
+      const result = await service.getServices([1, 2, 3]);
 
       expect(result.length).toBe(6);
     });
 
     it('should return null', inject([CacheService], async (cache: CacheService) => {
-      spyOn(cache, 'getCurrentLanguage').and.callFake(() => { return null });
+      spyOn(cache, 'getCurrentLanguage').and.callFake(() => null);
 
-      let result = await service.getServices([1, 2, 3]);
+      const result = await service.getServices([1, 2, 3]);
 
       expect(result).toBe(null);
     }));
 
     it('should emit unAuthorizedAction', inject([CommunicationService], async (communication: CommunicationService) => {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.payload = {
         data: null,
         result: -3,
       };
-      spyOn(communication, 'post').and.callFake(async () => { return reqMessage });
-      let spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
+      spyOn(communication, 'post').and.callFake(async () => reqMessage);
+      const spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
 
-      let result = await service.getServices([1, 2, 3]);
+      const result = await service.getServices([1, 2, 3]);
 
       expect(result).toBe(null);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -392,23 +395,23 @@ describe('CommunicationManagerService', () => {
 
   describe('saveSettings', () => {
     it('should return Success', async () => {
-      let counterConfig = new CounterLCDConfiguration(1);
+      const counterConfig = new CounterLCDConfiguration(1);
 
-      let result = await service.saveSettings(1, 'CounterLCD', JSON.stringify(counterConfig));
+      const result = await service.saveSettings(1, 'CounterLCD', JSON.stringify(counterConfig));
 
       expect(result).toBe(Result.Success);
     });
 
     it('should return Failed', inject([CommunicationService], async (communication: CommunicationService) => {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.payload = {
         data: null,
         result: -3,
       };
-      spyOn(communication, 'post').and.callFake(async () => { return reqMessage });
+      spyOn(communication, 'post').and.callFake(async () => reqMessage);
 
-      let result = await service.saveSettings(1, 'CounterLCD', JSON.stringify(new CounterLCDConfiguration(1)));
+      const result = await service.saveSettings(1, 'CounterLCD', JSON.stringify(new CounterLCDConfiguration(1)));
 
       expect(result).toBe(Result.Failed);
     }));
@@ -416,15 +419,15 @@ describe('CommunicationManagerService', () => {
 
   describe('loadLanguages', () => {
     it('should return loadLanguages', async () => {
-      let result = await service.loadLanguages();
+      const result = await service.loadLanguages();
 
       expect(result.length).toBe(2);
     });
 
     it('should return null', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'anonymousPost').and.callFake(async () => { return null });
+      spyOn(communication, 'anonymousPost').and.callFake(async () => null);
 
-      let result = await service.loadLanguages();
+      const result = await service.loadLanguages();
 
       expect(result).toBe(null);
     }));
@@ -432,15 +435,15 @@ describe('CommunicationManagerService', () => {
 
   describe('executeCommand', () => {
     it('should return Success', async () => {
-      let result = await service.executeCommand(1, 'CounterLCD', 'hello');
+      const result = await service.executeCommand(1, 'CounterLCD', 'hello');
 
       expect(result).toBe(Result.Success);
     });
 
     it('should return Failed', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'post').and.callFake(async () => { return null });
+      spyOn(communication, 'post').and.callFake(async () => null);
 
-      let result = await service.executeCommand(1, 'CounterLCD', 'hello');
+      const result = await service.executeCommand(1, 'CounterLCD', 'hello');
 
       expect(result).toBe(Result.Failed);
     }));
@@ -448,18 +451,18 @@ describe('CommunicationManagerService', () => {
 
   describe('loadFile', () => {
     it('should return file', inject([CommunicationService], async (communication: CommunicationService) => {
-      let file = 'the test file';
-      spyOn(communication, 'getFile').and.callFake(async () => { return file });
+      const file = 'the test file';
+      spyOn(communication, 'getFile').and.callFake(async () => file);
 
-      let result = await service.loadFile('testPath');
+      const result = await service.loadFile('testPath');
 
       expect(result).not.toBe(null);
     }));
 
     it('should return null', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'getFile').and.callFake(async () => { return null });
+      spyOn(communication, 'getFile').and.callFake(async () => null);
 
-      let result = await service.loadFile('testPath');
+      const result = await service.loadFile('testPath');
 
       expect(result).toBe(null);
     }));
@@ -467,44 +470,44 @@ describe('CommunicationManagerService', () => {
 
   describe('getServicesIDs', () => {
     it('should return IDS', inject([CommunicationService], async (communication: CommunicationService) => {
-      let array = [
-        { "EntityName": "M1_M2", "AvailableActions": null, "ID": 56, "OrgID": 1, "ClassName1": null, "ClassName2": null, "ObjectID1": 115, "ObjectID2": 110, "TableName": "R__" },
-        { "EntityName": "M1_M2", "AvailableActions": null, "ID": 69, "OrgID": 1, "ClassName1": null, "ClassName2": null, "ObjectID1": 115, "ObjectID2": 133, "TableName": "R__" }
+      const array = [
+        { EntityName: 'M1_M2', AvailableActions: null, ID: 56, OrgID: 1, ClassName1: null, ClassName2: null, ObjectID1: 115, ObjectID2: 110, TableName: 'R__' },
+        { EntityName: 'M1_M2', AvailableActions: null, ID: 69, OrgID: 1, ClassName1: null, ClassName2: null, ObjectID1: 115, ObjectID2: 133, TableName: 'R__' },
       ];
 
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.payload = {
         data: [array],
         result: 0,
       };
-      spyOn(communication, 'post').and.callFake(async () => { return reqMessage });
+      spyOn(communication, 'post').and.callFake(async () => reqMessage);
 
-      let result = await service.getServicesIDs(115);
+      const result = await service.getServicesIDs(115);
 
       expect(result).not.toBe(null);
       expect(result.length).toBe(2);
     }));
 
     it('should return null', inject([CommunicationService], async (communication: CommunicationService) => {
-      spyOn(communication, 'post').and.callFake(async () => { return null });
+      spyOn(communication, 'post').and.callFake(async () => null);
 
-      let result = await service.getServicesIDs(115);
+      const result = await service.getServicesIDs(115);
 
       expect(result).toBe(null);
     }));
 
     it('should emit unAuthorizedAction', inject([CommunicationService], async (communication: CommunicationService) => {
-      let reqMessage = new Message();
+      const reqMessage = new Message();
       reqMessage.time = Date.now();
       reqMessage.payload = {
         data: null,
         result: -3,
       };
-      spyOn(communication, 'post').and.callFake(async () => { return reqMessage });
-      let spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
+      spyOn(communication, 'post').and.callFake(async () => reqMessage);
+      const spy = spyOn(mockEventsService.unAuthorizedAction, 'emit');
 
-      let result = await service.getServicesIDs(115);
+      const result = await service.getServicesIDs(115);
 
       expect(result).toBe(null);
       expect(spy).toHaveBeenCalledTimes(1);

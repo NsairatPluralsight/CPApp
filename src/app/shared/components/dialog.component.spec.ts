@@ -15,13 +15,13 @@ describe('DialogComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [ DialogComponent],
-      providers:[
+      providers: [
         { provide: MatDialogRef, useValue: {} },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: LoggerService, useValue: mockLoggerservice },
         CacheService,
       ],
-      imports: [MaterialModule]
+      imports: [MaterialModule],
     })
     .compileComponents();
   }));

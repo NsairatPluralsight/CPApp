@@ -4,26 +4,26 @@ import { CacheService } from '../services/cache.service';
 import { EventsService } from '../services/events.service';
 import { Constants } from '../models/constants';
 import { MultilingualService } from '../services/multilingual.service';
-import { AuthenticatedUser } from '../models/user';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 @Component({
   selector: 'app-user-menu',
   templateUrl: './user-menu.component.html',
-  styleUrls: ['./user-menu.component.css']
+  styleUrls: ['./user-menu.component.css'],
 })
 export class UserMenuComponent implements OnInit, AfterViewChecked {
-  userName: string;
-  showMenu: boolean;
-  logoutCaption: string;
-  differentUser: string;
+  public userName: string;
+  public showMenu: boolean;
+  public logoutCaption: string;
+  public differentUser: string;
 
-  constructor(private logger: LoggerService, private cacheService: CacheService,private cdRef: ChangeDetectorRef,
-    private eventsService: EventsService, public languageService: MultilingualService) { }
+  constructor(private logger: LoggerService, private cacheService: CacheService, private cdRef: ChangeDetectorRef,
+              private eventsService: EventsService, public languageService: MultilingualService) { }
 
   /**
    * @summary - calls intilize
    */
-  ngOnInit(): void {
+  public ngOnInit(): void {
     try {
       this.initialize();
     } catch (error) {
@@ -34,7 +34,7 @@ export class UserMenuComponent implements OnInit, AfterViewChecked {
   /**
    * @summary - calls intilize to handle routing
    */
-  ngAfterViewChecked(): void {
+  public ngAfterViewChecked(): void {
     try {
       this.initialize();
       this.cdRef.detectChanges();
@@ -46,15 +46,14 @@ export class UserMenuComponent implements OnInit, AfterViewChecked {
   /**
    * @summary - get user name and show user menu
    */
-  initialize(): void {
+  public initialize(): void {
     try {
-      let user: AuthenticatedUser = this.cacheService.getUser();
+      const tUser: AuthenticatedUser = this.cacheService.getUser();
 
-      if (user) {
-        this.userName = user.username;
+      if (tUser) {
+        this.userName = tUser.username;
         this.logoutCaption = this.languageService.getCaption(Constants.cLOGOUT);
         this.differentUser = this.languageService.getCaption(Constants.cLOGIN_WITH_DIFFRENT_USER);
-
         this.showMenu = !this.isSigninPage();
       }
     } catch (error) {
@@ -65,9 +64,9 @@ export class UserMenuComponent implements OnInit, AfterViewChecked {
   /**
    * @summary - emit log out user and hide menu
    */
-  logout(isDiffrent: boolean): void {
+  public logout(pIsDiffrent: boolean): void {
     try {
-      if(isDiffrent) {
+      if (pIsDiffrent) {
         this.cacheService.setIsDiffrentUser(true);
       }
       this.eventsService.logoutUser.emit();
@@ -81,10 +80,10 @@ export class UserMenuComponent implements OnInit, AfterViewChecked {
    * @summary - returns whether the active page is signin or not
    * @returns {boolean}
    */
-  isSigninPage(): boolean{
+  public isSigninPage(): boolean {
     try {
-      let isSigninPage = location.href.includes(Constants.cSIGNIN.toLocaleLowerCase());
-      return isSigninPage;
+      const tIsSigninPage = location.href.includes(Constants.cSIGNIN.toLocaleLowerCase());
+      return tIsSigninPage;
     } catch (error) {
       this.logger.error(error);
     }

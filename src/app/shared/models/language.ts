@@ -1,7 +1,7 @@
 export class Language {
-  id: number;
-  caption: string;
-  index: number;
-  prefix: string;
-  rtl: number;
+  public id: number;
+  public caption: string;
+  public index: number;
+  public prefix: string;
+  public rtl: number;
 }

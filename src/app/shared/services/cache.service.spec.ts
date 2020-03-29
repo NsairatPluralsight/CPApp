@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { CacheService } from './cache.service';
 import { LoggerService } from './logger.service';
 import { SessionStorageService } from './session-storage.service';
-import { AuthenticatedUser } from '../models/user';
 import { Language } from '../models/language';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 describe('CacheService', () => {
   let service: CacheService;
@@ -16,9 +16,8 @@ describe('CacheService', () => {
       providers: [CacheService,
         { provide: LoggerService, useValue: mockLoggerservice },
         SessionStorageService,
-      ]
+      ],
     });
-
     service = TestBed.get(CacheService);
   });
 
@@ -28,7 +27,7 @@ describe('CacheService', () => {
 
   describe('setUser', () => {
     it('it should call storeData', () => {
-      let storeDataSpy = spyOn(SessionStorageService.prototype, 'storeData');
+      const storeDataSpy = spyOn(SessionStorageService.prototype, 'storeData');
 
       service.setUser(new AuthenticatedUser());
 
@@ -38,17 +37,15 @@ describe('CacheService', () => {
 
   describe('getUser', () => {
     it('it should call storeData', () => {
-      let getDataSpy = spyOn(SessionStorageService.prototype, 'getData');
+      const getDataSpy = spyOn(SessionStorageService.prototype, 'getData');
 
       service.getUser();
 
       expect(getDataSpy).toHaveBeenCalledTimes(1);
     });
-
   });
 
   describe('setlanguages', () => {
-
     it('languages should be null', () => {
       service.setlanguages(null);
 
@@ -63,11 +60,10 @@ describe('CacheService', () => {
   });
 
   describe('getLanguages', () => {
-
     it('languages should be null', () => {
       service.setlanguages(null);
 
-      let languages = service.getLanguages();
+      const languages = service.getLanguages();
 
       expect(languages).toBe(null);
     });
@@ -75,7 +71,7 @@ describe('CacheService', () => {
     it('languages should not be null', () => {
       service.setlanguages(new Array<Language>());
 
-      let languages = service.getLanguages();
+      const languages = service.getLanguages();
 
       expect(languages).not.toBe(null);
     });
@@ -83,7 +79,7 @@ describe('CacheService', () => {
 
   describe('setCurrentLanguage', () => {
     it('it should call storeData', () => {
-      let storeDataSpy = spyOn(SessionStorageService.prototype, 'storeData');
+      const storeDataSpy = spyOn(SessionStorageService.prototype, 'storeData');
 
       service.setCurrentLanguage(new Language());
 
@@ -93,12 +89,11 @@ describe('CacheService', () => {
 
   describe('getCurrentLanguage', () => {
     it('it should call storeData', () => {
-      let getDataSpy = spyOn(SessionStorageService.prototype, 'getData');
+      const getDataSpy = spyOn(SessionStorageService.prototype, 'getData');
 
       service.getCurrentLanguage();
 
       expect(getDataSpy).toHaveBeenCalledTimes(1);
     });
-
   });
 });

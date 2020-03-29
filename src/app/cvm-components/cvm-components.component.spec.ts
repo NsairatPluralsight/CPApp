@@ -18,7 +18,10 @@ import { CacheService } from '../shared/services/cache.service';
 describe('CVMComponentsComponent', () => {
   let component: CVMComponentsComponent;
   let fixture: ComponentFixture<CVMComponentsComponent>;
-  let mockLoggerservice, mockEventsService, mockMultilingualService, mockCommunicationManagerService;
+  let mockLoggerservice;
+  let mockEventsService;
+  let mockMultilingualService;
+  const mockCommunicationManagerService = {};
 
   mockEventsService = {
     statusUpdate: new EventEmitter(),
@@ -27,22 +30,18 @@ describe('CVMComponentsComponent', () => {
 
   mockEventsService.statusUpdate = new EventEmitter();
   mockEventsService.languageChanged = new EventEmitter();
-
   mockMultilingualService = {
-    getCaption() { return 'test' }
+    getCaption() { return 'test'; },
   };
-
-  let mockRouter = {
-    navigate: jasmine.createSpy('navigate')
+  const mockRouter = {
+    navigate: jasmine.createSpy('navigate'),
   };
-
-  let mockRoute = {
-    params: jasmine.createSpy('params')
+  const mockRoute = {
+    params: jasmine.createSpy('params'),
   };
 
   beforeEach(async(() => {
     mockLoggerservice = jasmine.createSpyObj(['error', 'info']);
-
     TestBed.configureTestingModule({
       declarations: [ CVMComponentsComponent ],
       providers: [
@@ -64,8 +63,8 @@ describe('CVMComponentsComponent', () => {
         MaterialModule,
         ReactiveFormsModule,
         SharedModule,
-        RouterModule
-      ]
+        RouterModule,
+      ],
     })
     .compileComponents();
   }));
@@ -81,22 +80,20 @@ describe('CVMComponentsComponent', () => {
   });
 
   describe('getDevices', () => {
-
     it('should call get devices', async () => {
-      let CVMComponentsServiceSpy = spyOn(CVMComponentsService.prototype, 'getDevices');
-      let getColumnNameSpy = spyOn(component, 'getColumnName');
+      const tCVMComponentsServiceSpy = spyOn(CVMComponentsService.prototype, 'getDevices');
+      const getColumnNameSpy = spyOn(component, 'getColumnName');
 
       await component.getDevices(true);
 
-      expect(CVMComponentsServiceSpy).toHaveBeenCalledTimes(1);
+      expect(tCVMComponentsServiceSpy).toHaveBeenCalledTimes(1);
       expect(getColumnNameSpy).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('applyFilter', () => {
-
     it('should call get devices', async () => {
-      let getDevicesSpy = spyOn(component, 'getDevices');
+      const getDevicesSpy = spyOn(component, 'getDevices');
 
       await component.applyFilter('ID');
 
@@ -105,12 +102,11 @@ describe('CVMComponentsComponent', () => {
   });
 
   describe('showError', () => {
-
     it('should call get getErrorCaption and openDialog', async () => {
-      let getErrorCaptionSpy = spyOn(CommonActionsService.prototype, 'getErrorCaption').and.callFake(
-        () => {return 'test' });
-      let openDialogSpy = spyOn(component, 'openDialog');
-      let ngOnInitSpy = spyOn(component, 'ngOnInit');
+      const getErrorCaptionSpy = spyOn(CommonActionsService.prototype, 'getErrorCaption').and.callFake(
+        () => 'test');
+      const openDialogSpy = spyOn(component, 'openDialog');
+      const ngOnInitSpy = spyOn(component, 'ngOnInit');
 
       await component.showError(-100);
 

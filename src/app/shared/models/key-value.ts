@@ -1,6 +1,6 @@
-export class keyValue {
-  key: string;
-  value: string;
+export class KeyValue {
+  public key: string;
+  public value: string;
 
   constructor(pKey: string, pValue: string) {
     this.key = pKey;

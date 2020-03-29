@@ -5,7 +5,7 @@ export class Guid {
 
   constructor(private logger: LoggerService) { }
 
-  getGuid(): string {
+  public getGuid(): string {
     try {
       return uuid();
     } catch (error) {

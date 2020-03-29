@@ -17,7 +17,10 @@ import { CounterLCDConfiguration } from '../shared/models/counter-lcd-configurat
 describe('CounterLCDComponent', () => {
   let component: CounterLCDComponent;
   let fixture: ComponentFixture<CounterLCDComponent>;
-  let mockLoggerservice, mockEventsService, mockMultilingualService, mockCommunicationManagerService;
+  let mockLoggerservice;
+  let mockEventsService;
+  let mockMultilingualService;
+  const mockCommunicationManagerService = {};
 
   mockEventsService = {
     statusUpdate: new EventEmitter(),
@@ -28,11 +31,11 @@ describe('CounterLCDComponent', () => {
   mockEventsService.languageChanged = new EventEmitter();
 
   mockMultilingualService = {
-    getCaption() { return 'test' }
+    getCaption() { return 'test'; },
   };
 
-  let mockRouter = {
-    params: jasmine.createSpy('navigate')
+  const mockRouter = {
+    params: jasmine.createSpy('navigate'),
   };
 
   beforeEach(async(() => {
@@ -55,8 +58,8 @@ describe('CounterLCDComponent', () => {
       imports: [
         MaterialModule,
         ReactiveFormsModule,
-        SharedModule
-      ]
+        SharedModule,
+      ],
     })
       .compileComponents();
   }));
@@ -72,37 +75,30 @@ describe('CounterLCDComponent', () => {
   });
 
   describe('fillFormGroup', () => {
-
     it('should create form group', async () => {
-
       await component.fillFormGroup(1);
 
       expect(component.countersForm.get('counter').value).toBe(1);
     });
-
   });
 
   describe('identify', () => {
-
     it('should call identify', async () => {
-      let spy = spyOn(CounterLCDService.prototype, 'identify');
+      const spy = spyOn(CounterLCDService.prototype, 'identify');
 
       await component.identify();
 
       expect(spy).toHaveBeenCalledTimes(1);
     });
-
   });
 
   describe('saveConfiguration', () => {
-
     it('should call setConfiguration', async () => {
-      let setConfigurationSpy = spyOn(CounterLCDService.prototype, 'setConfiguration');
-      let openDialogSpy = spyOn(component, 'openDialog');
-
-      let fb = new FormBuilder();
+      const setConfigurationSpy = spyOn(CounterLCDService.prototype, 'setConfiguration');
+      const openDialogSpy = spyOn(component, 'openDialog');
+      const fb = new FormBuilder();
       component.countersForm = fb.group({
-        counter: [1]
+        counter: [1],
       });
       component.counterLCDConfiguration = new CounterLCDConfiguration(1);
       component.disabled = false;
@@ -115,8 +111,8 @@ describe('CounterLCDComponent', () => {
     });
 
     it('should not call setConfiguration', async () => {
-      let setConfigurationSpy = spyOn(CounterLCDService.prototype, 'setConfiguration');
-      let openDialogSpy = spyOn(component, 'openDialog');
+      const setConfigurationSpy = spyOn(CounterLCDService.prototype, 'setConfiguration');
+      const openDialogSpy = spyOn(component, 'openDialog');
       component.disabled = true;
       component.canEdit = false;
 
@@ -125,6 +121,5 @@ describe('CounterLCDComponent', () => {
       expect(setConfigurationSpy).toHaveBeenCalledTimes(0);
       expect(openDialogSpy).toHaveBeenCalledTimes(1);
     });
-
   });
 });

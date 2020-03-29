@@ -1,7 +1,6 @@
 import { TestBed, fakeAsync } from '@angular/core/testing';
 import { EventEmitter } from '@angular/core';
 import { CommunicationService } from './communication.service';
-import { RequestPayload } from '../models/payload';
 import { EventsService } from './events.service';
 import { LoggerService } from './logger.service';
 import { CacheService } from './cache.service';
@@ -10,25 +9,25 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { Constants } from '../models/constants';
 import { Result } from '../models/enum';
 import { reject } from 'q';
-import { AuthenticatedUser, loginUserData, RefreshTokenData } from '../models/user';
 import { ConnectivityService } from './connectivity.service';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { RequestPayload } from '../models/request-payload';
+import { AuthenticatedUser } from '../models/authenticated-User';
+import { RefreshTokenData } from '../models/refresh-token-data';
 
 describe('CommunicationService', () => {
   let service: CommunicationService;
   let httpTestingController: HttpTestingController;
   let payload: RequestPayload;
   let mockLoggerservice;
-  let mockConnectivityService = {
+  const mockConnectivityService = {
 
-  }
+  };
 
-  let mockEventsService = {
+  const mockEventsService = {
     unAuthenticated: new EventEmitter(),
     unAuthorized: new EventEmitter(),
     onDisconnect: new EventEmitter(),
-    setUser: new EventEmitter()
+    setUser: new EventEmitter(),
   };
 
   mockEventsService.unAuthenticated = new EventEmitter();
@@ -45,11 +44,10 @@ describe('CommunicationService', () => {
         { provide: LoggerService, useValue: mockLoggerservice },
         { provide: ConnectivityService, useValue: mockConnectivityService },
         SessionStorageService,
-        CacheService
+        CacheService,
       ],
-      imports: [HttpClientTestingModule]
+      imports: [HttpClientTestingModule],
     });
-
 
     httpTestingController = TestBed.get(HttpTestingController);
     service = TestBed.get(CommunicationService);
@@ -61,26 +59,23 @@ describe('CommunicationService', () => {
   });
 
   describe('post', () => {
-
     it('it should call http post', fakeAsync(async () => {
       spyOn(CacheService.prototype, 'getUser').and.returnValue(new AuthenticatedUser());
 
       service.post(payload, 'test');
 
-      let req = httpTestingController.expectOne(Constants.cPOST_MESSAGE, '');
+      const req = httpTestingController.expectOne(Constants.cPOST_MESSAGE, '');
       expect(req.request.method).toBe('POST');
     }));
 
   });
 
-
   describe('logout', () => {
-
     it('it should call http post', fakeAsync(async () => {
-      spyOn(CacheService.prototype, 'getUser').and.returnValue(new AuthenticatedUser());     
+      spyOn(CacheService.prototype, 'getUser').and.returnValue(new AuthenticatedUser());
 
       service.logout();
-      let req = httpTestingController.expectOne(Constants.cLOGOUT_URL, '');
+      const req = httpTestingController.expectOne(Constants.cLOGOUT_URL, '');
       expect(req.request.method).toBe('POST');
     }));
   });
@@ -90,33 +85,30 @@ describe('CommunicationService', () => {
 
       service.anonymousPost(payload, 'test');
 
-      let req = httpTestingController.expectOne(Constants.cANONYMOUS_POST_MESSAGE, '');
+      const req = httpTestingController.expectOne(Constants.cANONYMOUS_POST_MESSAGE, '');
       expect(req.request.method).toBe('POST');
     }));
   });
 
   describe('authenticate', () => {
-
     it('it should call http post', fakeAsync(async () => {
-      let token = {
-        refreshToken: 'refreshToken'
+      const token = {
+        refreshToken: 'refreshToken',
       };
       service.authenticate(Constants.cREFRESH_TOKEN_URL, token);
 
-      let req = httpTestingController.expectOne(Constants.cREFRESH_TOKEN_URL, '');
+      const req = httpTestingController.expectOne(Constants.cREFRESH_TOKEN_URL, '');
       expect(req.request.method).toBe('POST');
     }));
 
   });
 
   describe('handleRefreshToken', () => {
-
     it('should call authenticate', () => {
-      let authUser = new AuthenticatedUser()
+      const authUser = new AuthenticatedUser();
       authUser.isSSO = true;
       spyOn(CacheService.prototype, 'getUser').and.returnValue(authUser);
-
-      let spy = spyOn(service, 'authenticate');
+      const spy = spyOn(service, 'authenticate');
 
       service.handleRefreshToken();
 
@@ -124,14 +116,14 @@ describe('CommunicationService', () => {
     });
 
     it('should call refreshToken', () => {
-      let authUser = new AuthenticatedUser();
+      const authUser = new AuthenticatedUser();
       authUser.userId = 1;
       authUser.token = undefined;
       authUser.isSSO = false;
-      authUser.username = "user";
-      authUser.refreshTokenData = new RefreshTokenData("refreshToken", "token")
+      authUser.username = 'user';
+      authUser.refreshTokenData = new RefreshTokenData('refreshToken', 'token');
       spyOn(CacheService.prototype, 'getUser').and.returnValue(authUser);
-      let spy = spyOn(service, 'refreshToken');
+      const spy = spyOn(service, 'refreshToken');
 
       service.handleRefreshToken();
 
@@ -141,13 +133,12 @@ describe('CommunicationService', () => {
   });
 
   describe('refreshToken', () => {
-
     it('it should return failed and emit unAuthnticated', async () => {
-      let closeSockeSpy = spyOn(service, 'closeSocketIO');
-      let authenticateSpy = spyOn(service, 'authenticate').and.callFake(async () => { return reject({ code: 401 }) });
-      let unAuthenticatedSpy = spyOn(mockEventsService.unAuthenticated, 'emit');
+      const closeSockeSpy = spyOn(service, 'closeSocketIO');
+      const authenticateSpy = spyOn(service, 'authenticate').and.callFake(async () => reject({ code: 401 }));
+      const unAuthenticatedSpy = spyOn(mockEventsService.unAuthenticated, 'emit');
 
-      let result = await service.refreshToken(new RefreshTokenData("refreshToken", "token"));
+      const result = await service.refreshToken(new RefreshTokenData('refreshToken', 'token'));
 
       expect(result).toBe(Result.Failed);
       expect(closeSockeSpy).toHaveBeenCalledTimes(1);
@@ -156,13 +147,12 @@ describe('CommunicationService', () => {
     });
 
     it('it should return Success and emit setUser', async () => {
+      const initializeSockeSpy = spyOn(service, 'initializeSocketIO').and.callFake(() => { return; });
+      const authenticateSpy = spyOn(service, 'authenticate').and.callFake(async () => ({ user: {}, token: 'token' }));
+      const setUser = spyOn(mockEventsService.setUser, 'emit');
+      const raiseUserTokenSpy = spyOn(SessionStorageService.prototype, 'raiseUserTokenRefreshed');
 
-      let initializeSockeSpy = spyOn(service, 'initializeSocketIO').and.callFake(() => { return; });
-      let authenticateSpy = spyOn(service, 'authenticate').and.callFake(async () => { return { user: {}, token: 'token' } });
-      let setUser = spyOn(mockEventsService.setUser, 'emit');
-      let raiseUserTokenSpy = spyOn(SessionStorageService.prototype, 'raiseUserTokenRefreshed');
-
-      let result = await service.refreshToken(new RefreshTokenData("refreshToken", "token"));
+      const result = await service.refreshToken(new RefreshTokenData('refreshToken', 'token'));
 
       expect(result).toBe(Result.Success);
       expect(initializeSockeSpy).toHaveBeenCalledTimes(1);
@@ -174,14 +164,11 @@ describe('CommunicationService', () => {
   });
 
   describe('getFile', () => {
-
     it('it should call http GET', fakeAsync(async () => {
-
       service.getFile('test');
 
-      let req = httpTestingController.expectOne('test', '');
+      const req = httpTestingController.expectOne('test', '');
       expect(req.request.method).toBe('GET');
     }));
-
   });
 });

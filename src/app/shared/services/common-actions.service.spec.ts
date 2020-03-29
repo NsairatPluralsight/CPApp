@@ -11,13 +11,15 @@ import { Permission } from '../models/permission';
 
 describe('CommonActionsService', () => {
   let service: CommonActionsService;
-  let mockLoggerservice, mockMultilingualService, mockCommunicationService;
+  let mockLoggerservice;
+  let mockMultilingualService;
+  const mockCommunicationService = undefined;
 
   mockMultilingualService = {
     getCaption(key) {
       return key + `_${Constants.cCAPTION}`;
-    }
-  }
+    },
+  };
 
   beforeEach(() => {
     mockLoggerservice = jasmine.createSpyObj(['error', 'info']);
@@ -29,9 +31,9 @@ describe('CommonActionsService', () => {
         CacheService,
         { provide: LoggerService, useValue: mockLoggerservice },
         { provide: MultilingualService, useValue: mockMultilingualService },
-        { provide: CommunicationService, useValue: mockCommunicationService}
-      ]
-    })
+        { provide: CommunicationService, useValue: mockCommunicationService},
+      ],
+    });
 
     service = TestBed.get(CommonActionsService);
   });
@@ -41,29 +43,27 @@ describe('CommonActionsService', () => {
   });
 
   describe('getErrorCaption', () => {
-
     it('should return INVALID_LOGIN_DATA error', () => {
-      let caption = service.getErrorCaption(LoginErrorCodes.InvalidPassword);
+      const caption = service.getErrorCaption(LoginErrorCodes.InvalidPassword);
 
       expect(caption).toBe(Constants.cERROR_INVALID_LOGIN_DATA + `_${Constants.cCAPTION}`);
     });
 
     it('should return general error', () => {
-      let caption = service.getErrorCaption(55);
+      const caption = service.getErrorCaption(55);
 
       expect(caption).toBe(Constants.cERROR_GENERAL + `_${Constants.cCAPTION}`);
     });
   });
 
   describe('checkUserPermission', () => {
-
     it('should return false', async () => {
-      let getUserPermissionSpy = spyOn(CommunicationManagerService.prototype, 'getUserPermission').and.callFake(() => {
+      const getUserPermissionSpy = spyOn(CommunicationManagerService.prototype, 'getUserPermission').and.callFake(() => {
         return null;
       });
-      let setPermissionSpy = spyOn(CacheService.prototype, 'setPermission');
+      const setPermissionSpy = spyOn(CacheService.prototype, 'setPermission');
 
-      let permition = await service.checkUserPermission();
+      const permition = await service.checkUserPermission();
 
       expect(permition).toBe(false);
       expect(getUserPermissionSpy).toHaveBeenCalledTimes(1);
@@ -71,12 +71,12 @@ describe('CommonActionsService', () => {
     });
 
     it('should return true', async () => {
-      let getUserPermissionSpy = spyOn(CommunicationManagerService.prototype, 'getUserPermission').and.callFake(() => {
+      const getUserPermissionSpy = spyOn(CommunicationManagerService.prototype, 'getUserPermission').and.callFake(() => {
         return new Permission(true, true, true, true, true);
       });
-      let setPermissionSpy = spyOn(CacheService.prototype, 'setPermission');
+      const setPermissionSpy = spyOn(CacheService.prototype, 'setPermission');
 
-      let permition = await service.checkUserPermission();
+      const permition = await service.checkUserPermission();
 
       expect(permition).toBe(true);
       expect(getUserPermissionSpy).toHaveBeenCalledTimes(1);
@@ -85,24 +85,23 @@ describe('CommonActionsService', () => {
   });
 
   describe('checkPermission', () => {
-
     it('should return false', async () => {
-      let getPermissionSpy = spyOn(CacheService.prototype, 'getPermission').and.callFake(() => {
+      const getPermissionSpy = spyOn(CacheService.prototype, 'getPermission').and.callFake(() => {
         return null;
       });
 
-      let permition = await service.checkPermission(PermissionType.Create);
+      const permition = await service.checkPermission(PermissionType.Create);
 
       expect(permition).toBe(false);
       expect(getPermissionSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should return true', async () => {
-      let getPermissionSpy = spyOn(CacheService.prototype, 'getPermission').and.callFake(() => {
+      const getPermissionSpy = spyOn(CacheService.prototype, 'getPermission').and.callFake(() => {
         return new Permission(true, true, true, true, true);
       });
 
-      let permition = await service.checkPermission(PermissionType.Create);
+      const permition = await service.checkPermission(PermissionType.Create);
 
       expect(permition).toBe(true);
       expect(getPermissionSpy).toHaveBeenCalledTimes(1);

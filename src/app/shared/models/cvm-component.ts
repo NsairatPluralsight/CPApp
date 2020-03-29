@@ -1,18 +1,18 @@
 export class CVMComponent {
-  id: number;
-  orgID: number;
-  typeName: string;
-  name_L1: string;
-  name_L2: string;
-  name_L3: string;
-  name_L4: string;
-  queueBranch_ID: number;
-  reportedData: any;
-  configuration: any;
-  className: string;
-  relatedObject_ID: number;
-  identity: string;
-  address: string;
-  description: string;
-  branch: string;
+  public id: number;
+  public orgID: number;
+  public typeName: string;
+  public name_L1: string;
+  public name_L2: string;
+  public name_L3: string;
+  public name_L4: string;
+  public queueBranch_ID: number;
+  public reportedData: any;
+  public configuration: any;
+  public className: string;
+  public relatedObject_ID: number;
+  public identity: string;
+  public address: string;
+  public description: string;
+  public branch: string;
 }

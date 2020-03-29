@@ -7,22 +7,24 @@ import { CacheService } from '../services/cache.service';
 import { SessionStorageService } from '../services/session-storage.service';
 import { MultilingualService } from '../services/multilingual.service';
 import { EventsService } from '../services/events.service';
-import { AuthenticatedUser, loginUserData } from '../models/user';
 import { Constants } from '../models/constants';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 describe('UserMenuComponent', () => {
   let component: UserMenuComponent;
   let fixture: ComponentFixture<UserMenuComponent>;
-  let mockLoggerservice, mockSessionService, mockLanguageService;
+  let mockLoggerservice;
+  let mockLanguageService;
+  const mockSessionService = {};
 
-  let mockEventsService = {
+  const mockEventsService = {
     logoutUser: new EventEmitter(),
   };
   mockEventsService.logoutUser = new EventEmitter();
 
   mockLanguageService = {
-    getCaption() { return Constants.cLOGOUT }
-  }
+    getCaption() { return Constants.cLOGOUT; },
+  };
 
   beforeEach(async(() => {
     mockLoggerservice = jasmine.createSpyObj(['error', 'info']);
@@ -34,9 +36,9 @@ describe('UserMenuComponent', () => {
         { provide: LoggerService, useValue: mockLoggerservice },
         { provide: SessionStorageService, useValue: mockSessionService },
         { provide: MultilingualService, useValue: mockLanguageService },
-        {provide: EventsService, useValue: mockEventsService }
+        {provide: EventsService, useValue: mockEventsService },
       ],
-      imports: [MaterialModule]
+      imports: [MaterialModule],
     })
     .compileComponents();
   }));
@@ -52,16 +54,15 @@ describe('UserMenuComponent', () => {
   });
 
   describe('intilize', () => {
-
     beforeEach(() => {
       spyOn(component, 'ngAfterViewChecked');
       spyOn(component, 'ngOnInit');
     });
 
-    it('should show Menu', () => { 
-      let authInfo = new AuthenticatedUser();
+    it('should show Menu', () => {
+      const authInfo = new AuthenticatedUser();
       authInfo.username = 'test';
-      spyOn(CacheService.prototype, 'getUser').and.callFake(() => { return authInfo });
+      spyOn(CacheService.prototype, 'getUser').and.callFake(() => authInfo);
 
       component.initialize();
 
@@ -71,7 +72,7 @@ describe('UserMenuComponent', () => {
 
     it('should no show Menu', () => {
       component.showMenu = false;
-      spyOn(CacheService.prototype, 'getUser').and.callFake(() => { return null });
+      spyOn(CacheService.prototype, 'getUser').and.callFake(() => null);
 
       component.initialize();
 
@@ -81,7 +82,7 @@ describe('UserMenuComponent', () => {
 
   describe('logout', () => {
     it('should emit logoutUser', () => {
-      let spy = spyOn(mockEventsService.logoutUser, 'emit');
+      const spy = spyOn(mockEventsService.logoutUser, 'emit');
 
       component.logout(false);
 

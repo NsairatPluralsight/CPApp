@@ -9,101 +9,83 @@ import { Constants } from '../models/constants';
 import { Result, LoginErrorCodes } from '../models/enum';
 import { SessionStorageService } from './session-storage.service';
 import { RequestResult } from '../models/request-result';
-import { AuthenticatedUser, RefreshTokenData } from '../models/user';
 import { ConnectivityService } from './connectivity.service';
+import { RefreshTokenData } from '../models/refresh-token-data';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 @Injectable()
 export class CommunicationService {
-  serviceUrl = '/';
-  socket: any = null;
+  public serviceUrl = '/';
+  public socket: any = null;
 
   constructor(private http: HttpClient, private eventsService: EventsService,
-    private logger: LoggerService, private cacheService: CacheService,
-    private sessionService: SessionStorageService, private connectivityService: ConnectivityService) { }
+              private logger: LoggerService, private cacheService: CacheService,
+              private sessionService: SessionStorageService, private connectivityService: ConnectivityService) { }
 
   /**
-    * @async
-    * @summary - connect socket io to the endpoint and listen to some events
-    * @param {string} token - string token to connect with endpoint
-    */
-  async initializeSocketIO(token: string): Promise<void> {
+   * @async
+   * @summary - connect socket io to the endpoint and listen to some events
+   * @param {string} token - string token to connect with endpoint
+   */
+  public async initializeSocketIO(pToken: string): Promise<void> {
     try {
-
       if (this.socket === null) {
-        this.socket = io(this.serviceUrl, { query: `${Constants.cTOKEN}=` + JSON.stringify(token) });
+        this.socket = io(this.serviceUrl, { query: `${Constants.cTOKEN}=` + JSON.stringify(pToken) });
 
-        this.socket.on(Constants.cENDPOINT_SERVICE_STATUS_UPDATE, (message: Message) => {
-          if (message && message.payload && message.payload.servicesStatuses) {
-            this.eventsService.servicesStatusUpdate.emit(message);
+        this.socket.on(Constants.cENDPOINT_SERVICE_STATUS_UPDATE, (pMessage: Message) => {
+          if (pMessage && pMessage.payload && pMessage.payload.servicesStatuses) {
+            this.eventsService.servicesStatusUpdate.emit(pMessage);
           }
         });
 
         this.socket.on(Constants.cERROR, async (pError: any) => {
-          let error = JSON.parse(pError);
-
-          if (error.status && error.status == 401) {
+          const tError = JSON.parse(pError);
+          if (tError.status && tError.status === 401) {
             await this.refreshToken(this.cacheService.getUser().refreshTokenData);
           }
         });
 
-
-        this.socket.on(Constants.cDISCONNECT, async (error: any) => {
-
-          if (error && error === "transport close") {
+        this.socket.on(Constants.cDISCONNECT, async (pError: any) => {
+          if (pError && pError === 'transport close') {
             this.connectivityService.handleEndPointServiceConnectivityChanged(false);
           }
-          /*           if (pError) {
-                      console.log(pError); */
-          /*    let error = JSON.parse(pError);
-             if (error && error.status && error.status == 401) {
-               await this.refreshToken(this.cacheService.getUser().refreshToken);
-             } */
-          /* } else {
-            this.connectivityService.handleEndPointServiceConnectivityChanged(false);
-          } */
         });
 
-        this.socket.on(Constants.cENDPOINT_READY, (data: Message) => {
-          this.connectivityService.handleEndPointServiceConnectivityChanged(true, data.time);
+        this.socket.on(Constants.cENDPOINT_READY, (pData: Message) => {
+          this.connectivityService.handleEndPointServiceConnectivityChanged(true, pData.time);
         });
       }
-
     } catch (error) {
       this.logger.error(error);
     }
   }
 
-  async initialize(token: string) {
+  public async initialize(pToken: string) {
     try {
+      await this.initializeSocketIO(pToken);
 
-      await this.initializeSocketIO(token);
-
-      let data: Message = await this.getInitialConnectivityReport();
-      if (data && data.payload && data.payload.servicesStatuses && !this.connectivityService.initialized) {
-        this.connectivityService.initialize(data.payload.servicesStatuses, data.time);
+      const tData: Message = await this.getInitialConnectivityReport();
+      if (tData && tData.payload && tData.payload.servicesStatuses && !this.connectivityService.initialized) {
+        this.connectivityService.initialize(tData.payload.servicesStatuses, tData.time);
       }
-
     } catch (error) {
       this.logger.error(error);
     }
   }
 
-
-  async getInitialConnectivityReport(): Promise<any> {
+  public async getInitialConnectivityReport(): Promise<any> {
     try {
-
       return new Promise<any>(async (resolve, reject) => {
-
-        const options = {
+        const tOptions = {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         };
-        const message: Message = new Message();
-        message.topicName = "EndPoint/GetServicesStatusReport";
-        let api = Constants.cANONYMOUS_POST_MESSAGE;
+        const tMessage: Message = new Message();
+        tMessage.topicName = 'EndPoint/GetServicesStatusReport';
+        const tAPI = Constants.cANONYMOUS_POST_MESSAGE;
 
-        await this.http.post(api, message, options).toPromise().then((data) => {
+        await this.http.post(tAPI, tMessage, tOptions).toPromise().then((data) => {
           resolve(data);
         }).catch(async (error) => {
           reject(undefined);
@@ -119,7 +101,7 @@ export class CommunicationService {
    * @async
    * @summary - close Socket.io connection
    */
-  async closeSocketIO(): Promise<void> {
+  public async closeSocketIO(): Promise<void> {
     try {
       if (this.socket) {
         this.socket.disconnect();
@@ -130,40 +112,40 @@ export class CommunicationService {
     }
   }
 
-  /**
-* @async
-* @summary Make a post request to the End point
-* @param {any} payload - the payload various by topic name.
-* @param {string} topicName - The ID of a branch.
-* @return {Promise<any>} - object wrapped in a promise.
-*/
-  async post(payload: any, topicName: string): Promise<any> {
+/**
+ * @async
+ * @summary Make a post request to the End point
+ * @param {any} payload - the payload various by topic name.
+ * @param {string} topicName - The ID of a branch.
+ * @return {Promise<any>} - object wrapped in a promise.
+ */
+  public async post(pPayload: any, pTopicName: string): Promise<any> {
     try {
-      let reqMessage = new Message();
-      reqMessage.time = Date.now();
-      reqMessage.topicName = topicName;
-      reqMessage.payload = payload;
+      const tReqMessage = new Message();
+      tReqMessage.time = Date.now();
+      tReqMessage.topicName = pTopicName;
+      tReqMessage.payload = pPayload;
 
-      let token = this.cacheService.getUser().token;
-      let options = {
+      const tToken = this.cacheService.getUser().token;
+      const tOptions = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        })
+          'Authorization': 'Bearer ' + tToken,
+        }),
       };
 
       return new Promise<object>(async (resolve, reject) => {
-        await this.http.post<any>(Constants.cPOST_MESSAGE, reqMessage, options).toPromise()
+        await this.http.post<any>(Constants.cPOST_MESSAGE, tReqMessage, tOptions).toPromise()
           .then((data) => {
             resolve(data);
           })
           .catch(async (err) => {
-            let result = await this.handleError(err, topicName);
+            const tResult = await this.handleError(err, pTopicName);
 
-            if (result.code == Result.Success) {
-              resolve(this.post(payload, topicName));
+            if (tResult.code === Result.Success) {
+              resolve(this.post(pPayload, pTopicName));
             } else {
-              resolve(result);
+              resolve(tResult);
             }
           });
       });
@@ -173,26 +155,29 @@ export class CommunicationService {
   }
 
   /**
-* @async
-* @summary Make a post request to the End point
-* @param {any} payload - the payload various by topic name.
-* @param {string} topicName - The ID of a branch.
-* @return {Promise<object>} - object wrapped in a promise.
-*/
-  async anonymousPost(payload: any, topicName: string): Promise<object> {
+   * @async
+   * @summary Make a post request to the End point
+   * @param {any} payload - the payload various by topic name.
+   * @param {string} topicName - The ID of a branch.
+   * @return {Promise<object>} - object wrapped in a promise.
+   */
+  public async anonymousPost(pPayload: any, pTopicName: string): Promise<object> {
+    try {
+      const tReqMessage = new Message();
+      tReqMessage.time = Date.now();
+      tReqMessage.topicName = pTopicName;
+      tReqMessage.payload = pPayload;
 
-    let reqMessage = new Message();
-    reqMessage.time = Date.now();
-    reqMessage.topicName = topicName;
-    reqMessage.payload = payload;
-
-    return await this.http.post<any>(Constants.cANONYMOUS_POST_MESSAGE, reqMessage, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
+      return await this.http.post<any>(Constants.cANONYMOUS_POST_MESSAGE, tReqMessage, {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+        }),
       })
-    })
-      .toPromise()
-      .catch(async (err) => await this.handleError(err, Constants.cCVM_SERVER));
+        .toPromise()
+        .catch(async (err) => await this.handleError(err, Constants.cCVM_SERVER));
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   /**
@@ -203,12 +188,12 @@ export class CommunicationService {
    * @param {any} options - object may contain headers or parameters etc.
    * @return {Promise<any>} - return response object wrapped in a promise.
    */
-  async authenticate(url: string, body: any, options?: any): Promise<any> {
+  public async authenticate(pURL: string, pBody: any, pOptions?: any): Promise<any> {
     try {
       return new Promise<object>(async (resolve, reject) => {
-        await this.http.post<any>(url, body, options).toPromise().then(data =>
-          resolve(data)
-        ).catch(async err => {
+        await this.http.post<any>(pURL, pBody, pOptions).toPromise().then((data) =>
+          resolve(data),
+        ).catch(async (err) => {
           reject(await this.handleError(err, Constants.cCVM_SERVER));
         });
       });
@@ -217,32 +202,32 @@ export class CommunicationService {
     }
   }
 
-  async logout(): Promise<Result> {
+  public async logout(): Promise<Result> {
     try {
-      let user = this.cacheService.getUser();
-      let payload = {
-        id: user.userId
-      }
-      let token = user.token;
-      let options = {
+      const tUser = this.cacheService.getUser();
+      const tPayload = {
+        id: tUser.userId,
+      };
+      const tToken = tUser.token;
+      const tOptions = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        })
+          'Authorization': 'Bearer ' + tToken,
+        }),
       };
 
       return new Promise<Result>(async (resolve, reject) => {
-        await this.http.post<any>(Constants.cLOGOUT_URL, payload, options).toPromise()
+        await this.http.post<any>(Constants.cLOGOUT_URL, tPayload, tOptions).toPromise()
           .then((data) => {
             resolve(data);
           })
           .catch(async (err) => {
-            let result = await this.handleError(err, "logout");
+            const tResult = await this.handleError(err, 'logout');
 
-            if (result.code == Result.Success) {
+            if (tResult.code === Result.Success) {
               resolve(this.logout());
             } else {
-              resolve(result.code);
+              resolve(tResult.code);
             }
           });
       });
@@ -252,44 +237,42 @@ export class CommunicationService {
   }
 
   /**
-  * @async
-  * @summary - try to refresh the token
-  * @param {string} refreshTokenData
-  * @returns {Promise<Result>} - Result enum wrapped in a promise.
-  */
-  async refreshToken(refreshTokenData: RefreshTokenData): Promise<Result> {
+   * @async
+   * @summary - try to refresh the token
+   * @param {string} refreshTokenData
+   * @returns {Promise<Result>} - Result enum wrapped in a promise.
+   */
+  public async refreshToken(pRefreshTokenData: RefreshTokenData): Promise<Result> {
     try {
-      let result = Result.Failed;
-
-      let options = {
+      let tResult = Result.Failed;
+      const tOptions = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json',
-        })
+        }),
       };
 
       await this.closeSocketIO();
-      await this.authenticate(Constants.cREFRESH_TOKEN_URL, refreshTokenData, options)
-        .then(async userData => {
+      await this.authenticate(Constants.cREFRESH_TOKEN_URL, pRefreshTokenData, tOptions)
+        .then(async (userData) => {
           if (userData) {
-            let authUser = new AuthenticatedUser();
-            authUser.username = userData.user.username;
-            authUser.userId = userData.user.id;
-            authUser.isSSO = false;
-            authUser.token = userData.token;
-            authUser.refreshTokenData = new RefreshTokenData(userData.refreshToken, userData.token);
-            this.eventsService.setUser.emit(authUser);
-            await this.initializeSocketIO(authUser.token);
+            const tAuthUser = new AuthenticatedUser();
+            tAuthUser.username = userData.user.username;
+            tAuthUser.userId = userData.user.id;
+            tAuthUser.isSSO = false;
+            tAuthUser.token = userData.token;
+            tAuthUser.refreshTokenData = new RefreshTokenData(userData.refreshToken, userData.token);
+            this.eventsService.setUser.emit(tAuthUser);
+            await this.initializeSocketIO(tAuthUser.token);
             this.sessionService.raiseUserTokenRefreshed();
-            result = Result.Success;
+            tResult = Result.Success;
           }
-        }).catch(error => {
+        }).catch((error) => {
           if (error && error.code) {
             this.logger.error(error);
             this.eventsService.unAuthenticated.emit();
           }
         });
-
-      return result;
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return Result.Failed;
@@ -297,12 +280,12 @@ export class CommunicationService {
   }
 
   /**
-  * @async
-  * @summary Make a get request to the file
-  * @param {string} filePath - The path of a file.
-  * @return {Promise<any>} - any wrapped in a promise.
-  */
-  async getFile(filePath: string): Promise<any> {
+   * @async
+   * @summary Make a get request to the file
+   * @param {string} filePath - The path of a file.
+   * @return {Promise<any>} - any wrapped in a promise.
+   */
+  public async getFile(filePath: string): Promise<any> {
     try {
       return await this.http.get(filePath).toPromise();
     } catch (error) {
@@ -315,33 +298,32 @@ export class CommunicationService {
    * @summary - refresh token by calling refresh mehtod if not sso or relogin if sso
    * @returns {Promise<number>} - number error code wrapped in a promise.
    */
-  async handleRefreshToken(): Promise<number> {
+  public async handleRefreshToken(): Promise<number> {
     let result: number = Result.Failed;
     try {
-      let cachedAuthUser: AuthenticatedUser = this.cacheService.getUser();
+      const tCachedAuthUser: AuthenticatedUser = this.cacheService.getUser();
 
-      if (cachedAuthUser.isSSO) {
-        await this.authenticate(Constants.cSSO_REFRESH_TOKEN_URL, cachedAuthUser.refreshTokenData, { withCredentials: true }).then(async userData => {
+      if (tCachedAuthUser.isSSO) {
+        await this.authenticate(Constants.cSSO_REFRESH_TOKEN_URL, tCachedAuthUser.refreshTokenData, { withCredentials: true }).then(async (userData) => {
           if (userData) {
-            let authUser = new AuthenticatedUser();
-            authUser.username = userData.user.username;
-            authUser.userId = userData.user.id;
-            authUser.isSSO = true;
-            authUser.token = userData.token;
-            authUser.refreshTokenData = new RefreshTokenData(userData.refreshToken, userData.token);
-            this.eventsService.setUser.emit(authUser);
+            const tAuthUser = new AuthenticatedUser();
+            tAuthUser.username = userData.user.username;
+            tAuthUser.userId = userData.user.id;
+            tAuthUser.isSSO = true;
+            tAuthUser.token = userData.token;
+            tAuthUser.refreshTokenData = new RefreshTokenData(userData.refreshToken, userData.token);
+            this.eventsService.setUser.emit(tAuthUser);
             result = LoginErrorCodes.Success;
           }
-        }).catch(error => {
+        }).catch((error) => {
           if (error && error.code) {
             this.logger.error(error);
             result = error.code;
           }
         });
       } else {
-        result = await this.refreshToken(cachedAuthUser.refreshTokenData);
+        result = await this.refreshToken(tCachedAuthUser.refreshTokenData);
       }
-
       return result;
     } catch (error) {
       this.logger.error(error);
@@ -350,45 +332,42 @@ export class CommunicationService {
   }
 
   /**
-  * @async
-  * @summary Handles Error catched from http request
-  * @param {HttpErrorResponse} err - the payload various by topic name.
-  * @return {Promise<RequestResult>} - RequestResult wrapped in a promise.
-  */
-  private async handleError(httpError: HttpErrorResponse, topic: string): Promise<RequestResult> {
-    let result = new RequestResult();
+   * @async
+   * @summary Handles Error catched from http request
+   * @param {HttpErrorResponse} err - the payload various by topic name.
+   * @return {Promise<RequestResult>} - RequestResult wrapped in a promise.
+   */
+  private async handleError(pHttpError: HttpErrorResponse, pTopic: string): Promise<RequestResult> {
+    const tResult = new RequestResult();
     try {
-      if (httpError.status || httpError.status == 0) {
-        result.code = httpError.status;
-        if (httpError.url.includes(Constants.cLOGIN_URL) || httpError.url.includes(Constants.cSSO_LOGIN_URL)) {
-          result.code = httpError.error.errorCode;
-        } else if (httpError.url.includes(Constants.cPOST_MESSAGE) && !httpError.url.includes(Constants.cANONYMOUS_POST_MESSAGE)) {
-          if (httpError.status == 401) {
-            result.code = await this.handleRefreshToken();
+      if (pHttpError.status || pHttpError.status === 0) {
+        tResult.code = pHttpError.status;
+        if (pHttpError.url.includes(Constants.cLOGIN_URL) || pHttpError.url.includes(Constants.cSSO_LOGIN_URL)) {
+          tResult.code = pHttpError.error.errorCode;
+        } else if (pHttpError.url.includes(Constants.cPOST_MESSAGE) && !pHttpError.url.includes(Constants.cANONYMOUS_POST_MESSAGE)) {
+          if (pHttpError.status === 401) {
+            tResult.code = await this.handleRefreshToken();
           } else {
-            let object = { error: httpError, topic: topic };
-            this.eventsService.reconnect.emit(object);
+            const tObject = { error: pHttpError, topic: pTopic };
+            this.eventsService.reconnect.emit(tObject);
           }
-        }
-        else if(httpError.url.includes(Constants.cLOGOUT_URL)) {
-          if (httpError.status == 401) {
-            result.code = await this.handleRefreshToken();
+        } else if (pHttpError.url.includes(Constants.cLOGOUT_URL)) {
+          if (pHttpError.status === 401) {
+            tResult.code = await this.handleRefreshToken();
           } else {
-            this.eventsService.unAuthorized.emit(httpError);
+            this.eventsService.unAuthorized.emit(pHttpError);
           }
+        } else if (pHttpError.url.includes(Constants.cREFRESH_TOKEN_URL)) {
+          this.eventsService.unAuthorized.emit(pHttpError);
         }
-        else if (httpError.url.includes(Constants.cREFRESH_TOKEN_URL)) {
-          this.eventsService.unAuthorized.emit(httpError);
-        }
+      } else {
+        tResult.code = LoginErrorCodes.Error;
       }
-      else {
-        result.code = LoginErrorCodes.Error;
-      }
-      return result;
+      return tResult;
     } catch (error) {
       this.logger.error(error);
-      result.code = LoginErrorCodes.Error;
-      return result;
+      tResult.code = LoginErrorCodes.Error;
+      return tResult;
     }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Language } from '../models/language';
-import { keyValue } from '../models/key-value';
+import { KeyValue } from '../models/key-value';
 import { LoggerService } from './logger.service';
 import { CommunicationManagerService } from './communication-manager.service';
 import { CacheService } from './cache.service';
@@ -9,24 +9,24 @@ import { Constants } from '../models/constants';
 
 @Injectable()
 export class MultilingualService {
-  languages: Language[] = [];
-  captions: keyValue[] = [];
-  defaultLanguageId: number;
-  filesPath = 'ComponentPortal/assets/resources/';
-  filesExtension = '.json';
+  public languages: Language[] = [];
+  public captions: KeyValue[] = [];
+  public defaultLanguageId: number;
+  public filesPath = 'ComponentPortal/assets/resources/';
+  public filesExtension = '.json';
 
   constructor(private logger: LoggerService, private commManagerService: CommunicationManagerService,
-    private cacheService: CacheService, private eventsService: EventsService) { }
+              private cacheService: CacheService, private eventsService: EventsService) { }
 
   /**
-  * @async
-  * @summary - get the current language and initialize languages
-  */
-  async initialize(): Promise<void> {
+   * @async
+   * @summary - get the current language and initialize languages
+   */
+  public async initialize(): Promise<void> {
     try {
-      let language = this.cacheService.getCurrentLanguage();
-      let languageID = language ? language.id : 1;
-      await this.loadLanguage(languageID);
+      const tLanguage = this.cacheService.getCurrentLanguage();
+      const tLanguageID = tLanguage ? tLanguage.id : 1;
+      await this.loadLanguage(tLanguageID);
     } catch (error) {
       this.logger.error(error);
     }
@@ -37,19 +37,19 @@ export class MultilingualService {
    * @summary - get the organaization languages and set current language
    * @param {number} languageID - the language ID you want to set as current
    */
-  async loadLanguage(languageID: number): Promise<void>  {
+  public async loadLanguage(pLanguageID: number): Promise<void>  {
     try {
       if (!this.languages || this.languages.length <= 0) {
         this.languages = await this.commManagerService.loadLanguages();
         this.cacheService.setlanguages(this.languages);
       }
-      let language = this.languages.find(p => p.id.toString() === languageID.toString());
-      if (language) {
-        this.cacheService.setCurrentLanguage(language);
-        let filePath = this.getFileName(language.prefix);
-        let captions = await this.commManagerService.loadFile(filePath);
-        this.captions = <keyValue[]>captions;
-        this.eventsService.languageChanged.emit(language);
+      const tLanguage = this.languages.find((p) => p.id.toString() === pLanguageID.toString());
+      if (tLanguage) {
+        this.cacheService.setCurrentLanguage(tLanguage);
+        const tFilePath = this.getFileName(tLanguage.prefix);
+        const tCaptions = await this.commManagerService.loadFile(tFilePath);
+        this.captions =  tCaptions as KeyValue[];
+        this.eventsService.languageChanged.emit(tLanguage);
       }
     } catch (error) {
       this.logger.error(error);
@@ -61,10 +61,10 @@ export class MultilingualService {
    * @param {string} langPrefix - the prefix of current language
    * @returns {string} - the caption file path
    */
-  getFileName(langPrefix: string): string {
+  public getFileName(pLangPrefix: string): string {
     try {
-      let filePath = `${this.filesPath}${langPrefix}${this.filesExtension}`;
-      return filePath;
+      const tFilePath = `${this.filesPath}${pLangPrefix}${this.filesExtension}`;
+      return tFilePath;
     } catch (error) {
       this.logger.error(error);
       return null;
@@ -76,16 +76,16 @@ export class MultilingualService {
    * @param {string} key - the caption id
    * @returns {string} - the caption
    */
-  getCaption(key: string): string {
+  public getCaption(pKey: string): string {
     try {
-      let caption = key + `_${Constants.cCAPTION}`;
+      let tCaption = pKey + `_${Constants.cCAPTION}`;
       if (this.captions && this.captions.length > 0) {
-        let captionObject = this.captions.find(p => p.key === key);
+        const captionObject = this.captions.find((p) => p.key === pKey);
         if (captionObject) {
-          caption = captionObject.value;
+          tCaption = captionObject.value;
         }
       }
-      return caption;
+      return tCaption;
     } catch (error) {
       this.logger.error(error);
       return null;

@@ -3,16 +3,16 @@ import { StateService } from './state.service';
 import { LoggerService } from './logger.service';
 import { EventsService } from './events.service';
 import { EventEmitter } from '@angular/core';
-import { ServiceStatus, InternalStatus } from '../models/enum';
+import { InternalStatus } from '../models/enum';
 
 describe('StateService', () => {
   let service: StateService;
-  let mockLoggerservice, mockEventsService;
+  let mockLoggerservice;
+  let mockEventsService;
 
   mockEventsService = {
-    statusUpdate: new EventEmitter()
+    statusUpdate: new EventEmitter(),
   };
-
   mockEventsService.statusUpdate = new EventEmitter();
 
   beforeEach(() => {
@@ -21,9 +21,8 @@ describe('StateService', () => {
       providers: [StateService,
         { provide: EventsService, useValue: mockEventsService },
         { provide: LoggerService, useValue: mockLoggerservice },
-      ]
+      ],
     });
-
     service = TestBed.get(StateService);
   });
 
@@ -33,7 +32,7 @@ describe('StateService', () => {
 
   describe('setStatus', () => {
     it('should emit an event', () => {
-      let spy = spyOn(mockEventsService.statusUpdate, 'emit');
+      const spy = spyOn(mockEventsService.statusUpdate, 'emit');
 
       service.setStatus(InternalStatus.Ready);
 
@@ -45,7 +44,7 @@ describe('StateService', () => {
     it('should get status error', () => {
       service.setStatus(InternalStatus.Error);
 
-      let result = service.getStatus();
+      const result = service.getStatus();
 
       expect(result).toBe(InternalStatus.Error);
     });
@@ -53,7 +52,7 @@ describe('StateService', () => {
     it('should get status ready', () => {
       service.setStatus(InternalStatus.Ready);
 
-      let result = service.getStatus();
+      const result = service.getStatus();
 
       expect(result).toBe(InternalStatus.Ready);
     });

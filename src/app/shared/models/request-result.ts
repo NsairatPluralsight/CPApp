@@ -1,4 +1,4 @@
 export class RequestResult {
-  code: number;
-  message: string;
+  public code: number;
+  public message: string;
 }

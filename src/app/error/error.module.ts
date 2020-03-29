@@ -6,6 +6,6 @@ import { ErrorComponent } from './error.component';
   declarations: [ErrorComponent],
   imports: [
     CommonModule,
-  ]
+  ],
 })
 export class ErrorModule { }

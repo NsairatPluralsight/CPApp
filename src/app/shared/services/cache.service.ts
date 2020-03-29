@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Language } from '../models/language';
 import { Cache } from '../models/cache';
-import { AuthenticatedUser } from '../models/user';
 import { LoggerService } from './logger.service';
 import { SessionStorageService } from './session-storage.service';
 import { Constants } from '../models/constants';
 import { Permission } from '../models/permission';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 @Injectable({ providedIn: 'root' })
 export class CacheService {
-  cache: Cache;
+  public cache: Cache;
 
   constructor(private logger: LoggerService, private sessionService: SessionStorageService) {
     this.cache = new Cache();
@@ -19,14 +19,14 @@ export class CacheService {
    * @summary - cache user info in service and session storage
    * @param {AuthenticatedUser} user - the user info to cache
    */
-  setUser(user: AuthenticatedUser): void {
+  public setUser(pUser: AuthenticatedUser): void {
     try {
-      if (user) {        
-        this.cache.user = user;
+      if (pUser) {
+        this.cache.user = pUser;
       } else {
         this.cache.user = null;
       }
-      this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cUSER}`, user);
+      this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cUSER}`, pUser);
     } catch (error) {
       this.logger.error(error);
     }
@@ -36,7 +36,7 @@ export class CacheService {
    * @summary - returns the user info if available
    * @returns {any} - user info or null
    */
-  getUser(): AuthenticatedUser {
+  public getUser(): AuthenticatedUser {
     try {
       return this.sessionService.getData(`${Constants.cSESSION_PREFIX}${Constants.cUSER}`);
     } catch (error) {
@@ -48,10 +48,10 @@ export class CacheService {
    * @summary - cache languages in service
    * @param {Language[]} languages - array of languages
    */
-  setlanguages(languages: Language[]): void {
+  public setlanguages(pLanguages: Language[]): void {
     try {
-      if (languages) {
-        this.cache.languages = languages;
+      if (pLanguages) {
+        this.cache.languages = pLanguages;
       } else {
         this.cache.languages = null;
       }
@@ -61,10 +61,10 @@ export class CacheService {
   }
 
   /**
-  * @summary - returns the language info if available
-  * @returns {Language[]} - array of language
-  */
-  getLanguages(): Language[] {
+   * @summary - returns the language info if available
+   * @returns {Language[]} - array of language
+   */
+  public getLanguages(): Language[] {
     try {
       return this.cache.languages;
     } catch (error) {
@@ -76,11 +76,11 @@ export class CacheService {
    * @summary - cache user info in service and session storage
    * @param {Language} language - the Current language of app
    */
-  setCurrentLanguage(language: Language): void {
+  public setCurrentLanguage(pLanguages: Language): void {
     try {
-      if (language) {
-        this.cache.currentLanguage = language;
-        this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cCURRENT_LANGUAGE}`, language);
+      if (pLanguages) {
+        this.cache.currentLanguage = pLanguages;
+        this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cCURRENT_LANGUAGE}`, pLanguages);
       } else {
         this.cache.currentLanguage = null;
         this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cCURRENT_LANGUAGE}`, null);
@@ -91,10 +91,10 @@ export class CacheService {
   }
 
   /**
-  * @summary - returns the Current language if available
-  * @returns {any} - language or null
-  */
-  getCurrentLanguage(): any {
+   * @summary - returns the Current language if available
+   * @returns {any} - language or null
+   */
+  public getCurrentLanguage(): any {
     try {
       return this.sessionService.getData(`${Constants.cSESSION_PREFIX}${Constants.cCURRENT_LANGUAGE}`);
     } catch (error) {
@@ -103,13 +103,13 @@ export class CacheService {
   }
 
   /**
- * @summary - cache permission in service
- * @param {Permission} permission
- */
-  setPermission(permission: Permission): void {
+   * @summary - cache permission in service
+   * @param {Permission} permission
+   */
+  public setPermission(pPermission: Permission): void {
     try {
-      if (permission) {
-        this.cache.user.permission = permission;
+      if (pPermission) {
+        this.cache.user.permission = pPermission;
       } else {
         this.cache.user.permission = null;
       }
@@ -120,10 +120,10 @@ export class CacheService {
   }
 
   /**
-  * @summary - returns the Permission if available
-  * @returns {Permission}
-  */
-  getPermission(): Permission {
+   * @summary - returns the Permission if available
+   * @returns {Permission}
+   */
+  public getPermission(): Permission {
     try {
       return this.getUser().permission;
     } catch (error) {
@@ -135,9 +135,9 @@ export class CacheService {
    * @summary - cache user user action login with diffrent user
    * @param {boolean} isDiffrentUser
    */
-  setIsDiffrentUser(isDiffrentUser: boolean) {
+  public setIsDiffrentUser(pIsDiffrentUser: boolean) {
     try {
-      this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cIS_DIFFRENT_USER}`, isDiffrentUser);
+      this.sessionService.storeData(`${Constants.cSESSION_PREFIX}${Constants.cIS_DIFFRENT_USER}`, pIsDiffrentUser);
     } catch (error) {
       this.logger.error(error);
     }
@@ -147,7 +147,7 @@ export class CacheService {
    * @summary - returns whether user trys to login with diffrent user or not
    * @returns {boolean}
    */
-  getIsDiffrentUser(): boolean {
+  public getIsDiffrentUser(): boolean {
     try {
       return this.sessionService.getData(`${Constants.cSESSION_PREFIX}${Constants.cIS_DIFFRENT_USER}`);
     } catch (error) {

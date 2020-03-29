@@ -11,6 +11,6 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     MaterialModule,
   ],
-  bootstrap: [LoginComponent]
+  bootstrap: [LoginComponent],
 })
 export class LoginModule { }

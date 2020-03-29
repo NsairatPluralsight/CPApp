@@ -1,40 +1,40 @@
 export enum Result {
   Success = 0,
-  Failed = -1
+  Failed = -1,
 }
 
 export enum Direction {
   None = 0,
   Right = 1,
-  Left = 2
+  Left = 2,
 }
 
 export enum CountersOption {
   All = 0,
-  Custom  = 1
+  Custom  = 1,
 }
 
 export enum InternalStatus {
   Preparing = 0,
   Ready = 1,
   Error = 2,
-  Connecting = 3
+  Connecting = 3,
 }
 
 export enum ErrorType {
   General = 0,
   Connection = 1,
-  Database = 2
+  Database = 2,
 }
 
 export enum MainLCDDisplayMode {
   CurrentCustomer = 0,
-  WithWaiting = 1
+  WithWaiting = 1,
 }
 
 export enum AuthenticationMode {
   Seamless = 0,
-  UsernameAndPassword = 1
+  UsernameAndPassword = 1,
 }
 
 export enum LoginErrorCodes {
@@ -51,27 +51,26 @@ export enum LoginErrorCodes {
   RefreshTokenNotPresent = -908,
   InvalidToken = -909,
   InvalidRefreshToken = -910,
-  SSONotEnabled = -911
+  SSONotEnabled = -911,
 }
 
 export enum Error {
   General = -1,
   NotAllowed = -2,
   Unauthorized = -3,
-  Disconnected = -4
+  Disconnected = -4,
 }
 
-export enum PermissionType
-{
+export enum PermissionType {
     Create = 0,
     Edit = 1,
     Read = 2,
     Delete = 3,
-    Report = 15
+    Report = 15,
 }
 
 export enum ServiceStatus {
-  Unknown = "unknown",
-  Working = "working",
-  Error = "error"
-};
+  Unknown = 'unknown',
+  Working = 'working',
+  Error = 'error',
+}

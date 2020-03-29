@@ -7,50 +7,49 @@ import { CommunicationManagerService } from './communication-manager.service';
 import { CacheService } from './cache.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CommonActionsService {
 
   constructor(private logger: LoggerService, private multillingualService: MultilingualService,
-    private communicationManager: CommunicationManagerService, private cache: CacheService) { }
+              private communicationManager: CommunicationManagerService, private cache: CacheService) { }
 
   /**
    * @summary - get the caption for specific error
    * @param {number} errorCode - the error number
    * @returns {string} - the caption
    */
-  getErrorCaption(errorCode: number): string {
+  public getErrorCaption(errorCode: number): string {
     try {
-      let key = Constants.cERROR_GENERAL;
+      let tKey = Constants.cERROR_GENERAL;
       switch (errorCode) {
         case LoginErrorCodes.UserInactive:
-          key = Constants.cERROR_EMPLOYEE_NOT_ACTIVE;
+          tKey = Constants.cERROR_EMPLOYEE_NOT_ACTIVE;
           break;
         case LoginErrorCodes.UserLocked:
-          key = Constants.cERROR_EMPLOYEE_LOCKED;
+          tKey = Constants.cERROR_EMPLOYEE_LOCKED;
           break;
         case LoginErrorCodes.PasswordExpired:
-          key = Constants.cERROR_PASSWORD_EXPIRED;
+          tKey = Constants.cERROR_PASSWORD_EXPIRED;
           break;
         case LoginErrorCodes.UnauthorizedLogin:
-          key = Constants.cERROR_UNAUTHORIZED_LOGIN;
+          tKey = Constants.cERROR_UNAUTHORIZED_LOGIN;
           break;
         case LoginErrorCodes.InvalidUsername:
         case LoginErrorCodes.InvalidPassword:
         case LoginErrorCodes.InvalidLoginData:
-          key = Constants.cERROR_INVALID_LOGIN_DATA;
+          tKey = Constants.cERROR_INVALID_LOGIN_DATA;
           break;
         case Error.NotAllowed:
-          key = Constants.cERROR_NOT_ALLOWed;
+          tKey = Constants.cERROR_NOT_ALLOWed;
         case Error.Disconnected:
-          key = Constants.cERROR_DISCONNECTED;
+          tKey = Constants.cERROR_DISCONNECTED;
           break;
       }
-      return this.multillingualService.getCaption(key);
+      return this.multillingualService.getCaption(tKey);
     } catch (error) {
       this.logger.error(error);
-      let key = Constants.cERROR_GENERAL;
-      return this.multillingualService.getCaption(key);
+      return this.multillingualService.getCaption(Constants.cERROR_GENERAL);
     }
   }
 
@@ -59,52 +58,51 @@ export class CommonActionsService {
    * @summary - get user Permission from server and check if he got read
    * @returns {Promise<boolean>} - boolean wrapped in a promise.
    */
-  async checkUserPermission(): Promise<boolean> {
+  public async checkUserPermission(): Promise<boolean> {
     try {
-      let result = false;
-      let permission = await this.communicationManager.getUserPermission();
+      let tResult = false;
+      const tPermission = await this.communicationManager.getUserPermission();
 
-      if (permission) {
-        this.cache.setPermission(permission);
-        result = permission.read
+      if (tPermission) {
+        this.cache.setPermission(tPermission);
+        tResult = tPermission.read;
       }
-
-      return result
+      return tResult;
     } catch (error) {
       this.logger.error(error);
     }
   }
 
   /**
-  * @summary - check if specific permission is available or not
-  * @param {PermissionType} type - the Permission Type to check
-  * @returns {boolean} - the caption
-  */
-  async checkPermission(type: PermissionType): Promise<boolean> {
+   * @summary - check if specific permission is available or not
+   * @param {PermissionType} type - the Permission Type to check
+   * @returns {boolean} - the caption
+   */
+  public async checkPermission(type: PermissionType): Promise<boolean> {
     try {
-      let result = false;
-      let permission = await this.cache.getPermission();
+      let tResult = false;
+      const permission = await this.cache.getPermission();
 
       if (permission) {
         switch (type) {
           case PermissionType.Create:
-            result = permission.create;
+            tResult = permission.create;
             break;
           case PermissionType.Edit:
-            result = permission.edit;
+            tResult = permission.edit;
             break;
           case PermissionType.Read:
-            result = permission.read;
+            tResult = permission.read;
             break;
           case PermissionType.Report:
-            result = permission.report;
+            tResult = permission.report;
             break;
           case PermissionType.Delete:
-            result = permission.delete;
+            tResult = permission.delete;
             break;
         }
       }
-      return result
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return false;

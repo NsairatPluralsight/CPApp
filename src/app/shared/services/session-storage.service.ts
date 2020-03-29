@@ -4,18 +4,18 @@ import { EventsService } from './events.service';
 import { Guid } from '../models/guid';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SessionStorageService {
-  storageEvent: string = "storage";
-  getUserInitialDataFromOtherTabsEvent: string = "getUserInitialData";
-  userInitialDataAvailableEvent: string = "userInitialData";
-  userLoginDataAvailableEvent: string = "userLogin";
-  userLogoutDataAvailableEvent: string = "userLogout";
-  userRefreshDataAvailableEvent: string = "userUpdate";
+  public storageEvent: string = 'storage';
+  public getUserInitialDataFromOtherTabsEvent: string = 'getUserInitialData';
+  public userInitialDataAvailableEvent: string = 'userInitialData';
+  public userLoginDataAvailableEvent: string = 'userLogin';
+  public userLogoutDataAvailableEvent: string = 'userLogout';
+  public userRefreshDataAvailableEvent: string = 'userUpdate';
 
-  //given for the current tab to identify where the storage event is raised from, and ignore own events
-  guid: string;
+  // given for the current tab to identify where the storage event is raised from, and ignore own events
+  public guid: string;
 
   constructor(private logger: LoggerService, private eventService: EventsService) {
     this.guid = new Guid(logger).getGuid();
@@ -27,13 +27,12 @@ export class SessionStorageService {
    * @param key - a label of the data you want to save or remove
    * @param value - the data or null
    */
-  public storeData(key: string, value: any): void {
-    if (value) {
-      value = JSON.stringify(value);
-      sessionStorage.setItem(key, value);
-    }
-    else {
-      sessionStorage.removeItem(key);
+  public storeData(pKey: string, pValue: any): void {
+    if (pValue) {
+      pValue = JSON.stringify(pValue);
+      sessionStorage.setItem(pKey, pValue);
+    } else {
+      sessionStorage.removeItem(pKey);
     }
   }
 
@@ -42,11 +41,11 @@ export class SessionStorageService {
    * @param key - a label of the data you want to retrieve
    * @returns {any} - null or data
    */
-  public getData(key: string): any {
+  public getData(pKey: string): any {
     try {
-      let item = sessionStorage.getItem(key);
-      if (item) {
-        return JSON.parse(item);
+      const tItem = sessionStorage.getItem(pKey);
+      if (tItem) {
+        return JSON.parse(tItem);
       }
       return null;
     } catch (error) {
@@ -58,7 +57,7 @@ export class SessionStorageService {
   /**
    * @summary - set session event to get setion from another tab
    */
-  getDataFromOtherTabs(): void {
+  public getDataFromOtherTabs(): void {
     try {
       localStorage.setItem(this.getUserInitialDataFromOtherTabsEvent, this.guid);
       localStorage.removeItem(this.getUserInitialDataFromOtherTabsEvent);
@@ -68,24 +67,11 @@ export class SessionStorageService {
   }
 
   /**
-   * @async
-   * @summary - add listener to session storage events
-   */
-  private async startStorageListener(): Promise<void> {
-    try {
-      window.removeEventListener(this.storageEvent, this.storageEventListener.bind(this));
-      window.addEventListener(this.storageEvent, this.storageEventListener.bind(this));
-    } catch (error) {
-      this.logger.error(error);
-    }
-  }
-
-  /**
    * @summary - set session event so other tabs copy the session
    */
-  raiseUserSessionDataAvailable(): void {
+  public raiseUserSessionDataAvailable(): void {
     try {
-      localStorage.setItem(this.userInitialDataAvailableEvent, JSON.stringify({ sessionStorage: sessionStorage, source: this.guid }));
+      localStorage.setItem(this.userInitialDataAvailableEvent, JSON.stringify({ sessionStorage, source: this.guid }));
       localStorage.removeItem(this.userInitialDataAvailableEvent);
     } catch (error) {
       this.logger.error(error);
@@ -95,9 +81,9 @@ export class SessionStorageService {
   /**
    * @summary - set session event so other tabs logout
    */
-  raiseUserLogout(): void {
+  public raiseUserLogout(): void {
     try {
-      localStorage.setItem(this.userLogoutDataAvailableEvent, JSON.stringify({ sessionStorage: sessionStorage, source: this.guid }));
+      localStorage.setItem(this.userLogoutDataAvailableEvent, JSON.stringify({ sessionStorage, source: this.guid }));
       localStorage.removeItem(this.userLogoutDataAvailableEvent);
     } catch (error) {
       this.logger.error(error);
@@ -105,11 +91,11 @@ export class SessionStorageService {
   }
 
   /**
- * @summary - set session event so other tabs login
- */
-  raiseUserLogin(): void {
+   * @summary - set session event so other tabs login
+   */
+  public raiseUserLogin(): void {
     try {
-      localStorage.setItem(this.userLoginDataAvailableEvent, JSON.stringify({ sessionStorage: sessionStorage, source: this.guid }));
+      localStorage.setItem(this.userLoginDataAvailableEvent, JSON.stringify({ sessionStorage, source: this.guid }));
       localStorage.removeItem(this.userLoginDataAvailableEvent);
     } catch (error) {
       this.logger.error(error);
@@ -119,9 +105,9 @@ export class SessionStorageService {
   /**
    * @summary - set session event so other copy the refresh token
    */
-  raiseUserTokenRefreshed(): void {
+  public raiseUserTokenRefreshed(): void {
     try {
-      localStorage.setItem(this.userRefreshDataAvailableEvent, JSON.stringify({ sessionStorage: sessionStorage, source: this.guid }));
+      localStorage.setItem(this.userRefreshDataAvailableEvent, JSON.stringify({ sessionStorage, source: this.guid }));
       localStorage.removeItem(this.userRefreshDataAvailableEvent);
     } catch (error) {
       this.logger.error(error);
@@ -132,33 +118,33 @@ export class SessionStorageService {
    * @summary - handles the session storage events
    * @param event - session storage event
    */
-  storageEventListener(event: StorageEvent): void {
+  public storageEventListener(pEvent: StorageEvent): void {
     try {
-      if (event.key == this.getUserInitialDataFromOtherTabsEvent) {
+      if (pEvent.key === this.getUserInitialDataFromOtherTabsEvent) {
         // Some tab asked for the sessionStorage other than this tab -> send it by raising userSessionStorage event
-        if (event.newValue !== this.guid) {
+        if (pEvent.newValue !== this.guid) {
           this.raiseUserSessionDataAvailable();
-        }
-        else {
+        } else {
           this.eventService.loadDataDone.emit(true);
         }
-      } else if (event.key === this.userInitialDataAvailableEvent
-        || event.key === this.userLoginDataAvailableEvent
-        || event.key === this.userLogoutDataAvailableEvent
-        || event.key === this.userRefreshDataAvailableEvent) {
+      } else if (pEvent.key === this.userInitialDataAvailableEvent
+        || pEvent.key === this.userLoginDataAvailableEvent
+        || pEvent.key === this.userLogoutDataAvailableEvent
+        || pEvent.key === this.userRefreshDataAvailableEvent) {
 
-        //update session storage from other tabs on login, open new tab, logout, token refresh
-        var data = JSON.parse(event.newValue);
+        // update session storage from other tabs on login, open new tab, logout, token refresh
+        const tData = JSON.parse(pEvent.newValue);
 
-        if (data && data.source !== this.guid && data.sessionStorage && this.isDifferentSessionStorage(data.sessionStorage)) {
+        if (tData && tData.source !== this.guid && tData.sessionStorage && this.isDifferentSessionStorage(tData.sessionStorage)) {
 
-          for (var key in data.sessionStorage) {
-            this.storeData(key, JSON.parse(data.sessionStorage[key]));
-            if (event.key === this.userInitialDataAvailableEvent) {
+          // tslint:disable-next-line: forin
+          for (const tKey in tData.sessionStorage) {
+            this.storeData(tKey, JSON.parse(tData.sessionStorage[tKey]));
+            if (pEvent.key === this.userInitialDataAvailableEvent) {
               this.eventService.loadDataDone.emit(true);
-            } else if (event.key === this.userLogoutDataAvailableEvent) {
+            } else if (pEvent.key === this.userLogoutDataAvailableEvent) {
               this.eventService.logoutUser.emit();
-            } else if (event.key === this.userLoginDataAvailableEvent) {
+            } else if (pEvent.key === this.userLoginDataAvailableEvent) {
               this.eventService.loginUser.emit();
             }
           }
@@ -173,22 +159,34 @@ export class SessionStorageService {
    * @summary - check if there is deffrence between the session
    * @param newSessionStorage - the session copied from another tab
    */
-  isDifferentSessionStorage(newSessionStorage): boolean {
+  public isDifferentSessionStorage(pNewSessionStorage): boolean {
     try {
-      if (sessionStorage && newSessionStorage) {
-        if (sessionStorage.length !== newSessionStorage.length) {
+      if (sessionStorage && pNewSessionStorage) {
+        if (sessionStorage.length !== pNewSessionStorage.length) {
           return true;
         }
-        for (var key in newSessionStorage) {
-          if (sessionStorage[key] === newSessionStorage[key]) {
+        for (const key in pNewSessionStorage) {
+          if (sessionStorage[key] === pNewSessionStorage[key]) {
             continue;
-          }
-          else {
+          } else {
             return true;
           }
         }
       }
-      return false
+      return false;
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  /**
+   * @async
+   * @summary - add listener to session storage events
+   */
+  private async startStorageListener(): Promise<void> {
+    try {
+      window.removeEventListener(this.storageEvent, this.storageEventListener.bind(this));
+      window.addEventListener(this.storageEvent, this.storageEventListener.bind(this));
     } catch (error) {
       this.logger.error(error);
     }

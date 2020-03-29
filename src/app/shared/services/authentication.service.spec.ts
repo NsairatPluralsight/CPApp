@@ -5,14 +5,14 @@ import { CacheService } from './cache.service';
 import { CommunicationService } from './communication.service';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { LoginErrorCodes } from '../models/enum';
-import { AuthenticatedUser } from '../models/user';
 import { reject } from 'q';
 import { StateService } from './state.service';
+import { AuthenticatedUser } from '../models/authenticated-User';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
   let mockLoggerservice;
-  let mockStateService;
+  const mockStateService = undefined;
 
   beforeEach(() => {
     mockLoggerservice = jasmine.createSpyObj(['error', 'info']);
@@ -25,7 +25,7 @@ describe('AuthenticationService', () => {
         CommunicationService,
         CacheService,
       ],
-      imports: [HttpClientTestingModule]
+      imports: [HttpClientTestingModule],
     });
 
     service = TestBed.get(AuthenticationService);
@@ -38,21 +38,21 @@ describe('AuthenticationService', () => {
   describe('SSOLogin', () => {
     it('should return error', async () => {
       spyOn(CommunicationService.prototype, 'authenticate').and.callFake(async () => {
-        return reject({ status: 401, code: LoginErrorCodes.InvalidUsername })
+        return reject({ status: 401, code: LoginErrorCodes.InvalidUsername });
       });
 
-      let result = await service.SSOLogin();
+      const result = await service.SSOLogin();
 
       expect(result).toBe(LoginErrorCodes.InvalidUsername);
     });
 
     it('should return success', async () => {
       spyOn(CommunicationService.prototype, 'authenticate').and.callFake(async () => {
-        return { user: {}, token: 'test' }
+        return { user: {}, token: 'test' };
       });
-      let spy = spyOn(service, 'setUser');
+      const spy = spyOn(service, 'setUser');
 
-      let result = await service.SSOLogin();
+      const result = await service.SSOLogin();
 
       expect(result).toBe(LoginErrorCodes.Success);
       expect(spy).toHaveBeenCalled();
@@ -62,21 +62,21 @@ describe('AuthenticationService', () => {
   describe('login', () => {
     it('should return error', async () => {
       spyOn(CommunicationService.prototype, 'authenticate').and.callFake(async () => {
-        return reject({ status: 401, code: LoginErrorCodes.InvalidUsername })
+        return reject({ status: 401, code: LoginErrorCodes.InvalidUsername });
       });
 
-      let result = await service.login('nsairat', '123456');
+      const result = await service.login('nsairat', '123456');
 
       expect(result).toBe(LoginErrorCodes.InvalidUsername);
     });
 
     it('should return success', async () => {
       spyOn(CommunicationService.prototype, 'authenticate').and.callFake(async () => {
-        return { user: {},  token: 'test' }
+        return { user: {},  token: 'test' };
       });
-      let spy = spyOn(service, 'setUser');
+      const spy = spyOn(service, 'setUser');
 
-      let result = await service.login('nsairat', '123456');
+      const result = await service.login('nsairat', '123456');
 
       expect(result).toBe(LoginErrorCodes.Success);
       expect(spy).toHaveBeenCalled();
@@ -85,8 +85,8 @@ describe('AuthenticationService', () => {
 
   describe('login', () => {
     it('should call two methods', () => {
-      let setUserSpy = spyOn(CacheService.prototype, 'setUser');
-      let socketIOSpy = spyOn(CommunicationService.prototype, 'initializeSocketIO');
+      const setUserSpy = spyOn(CacheService.prototype, 'setUser');
+      const socketIOSpy = spyOn(CommunicationService.prototype, 'initializeSocketIO');
 
       service.setUser(new AuthenticatedUser());
 

@@ -17,8 +17,8 @@ import { CVMComponentsService } from './cvm-components.service';
     RouterModule,
   ],
   providers: [
-    CVMComponentsService
+    CVMComponentsService,
   ],
-  bootstrap: [CVMComponentsComponent]
+  bootstrap: [CVMComponentsComponent],
 })
 export class CVMComponentsModule { }

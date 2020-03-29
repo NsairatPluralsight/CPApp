@@ -7,18 +7,18 @@ import { Constants } from '../models/constants';
 @Component({
   selector: 'app-dialog',
   templateUrl: './dialog.component.html',
-  styleUrls: ['./dialog.component.css']
+  styleUrls: ['./dialog.component.css'],
 })
 export class DialogComponent implements OnInit {
-  title: string;
-  subTitle: string;
-  message: string;
-  cancelText: string;
-  yesText: string;
-  languageDirection: string;
+  public title: string;
+  public subTitle: string;
+  public message: string;
+  public cancelText: string;
+  public yesText: string;
+  public languageDirection: string;
 
   constructor(public dialogRef: MatDialogRef<DialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any, private cache: CacheService, private logger: LoggerService) {
+              @Inject(MAT_DIALOG_DATA) public data: any, private cache: CacheService, private logger: LoggerService) {
     this.title = data['title'];
     this.subTitle = data['subTitle'];
     this.message = data['message'];
@@ -26,12 +26,11 @@ export class DialogComponent implements OnInit {
     this.yesText = data['yesText'];
   }
 
-  ngOnInit() {
+  public ngOnInit() {
     try {
       this.languageDirection = this.cache.getCurrentLanguage().rtl === 1 ? Constants.cRTL : Constants.cLTR;
     } catch (error) {
       this.logger.error(error);
     }
   }
-
 }

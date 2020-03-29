@@ -12,8 +12,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     CommonModule,
     SharedModule,
     ReactiveFormsModule,
-    MaterialModule
+    MaterialModule,
   ],
-  providers: [CounterLCDService]
+  providers: [CounterLCDService],
 })
 export class CounterLcdModule { }
