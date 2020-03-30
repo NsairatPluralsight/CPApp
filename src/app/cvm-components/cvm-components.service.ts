@@ -6,6 +6,9 @@ import { Branch } from '../shared/models/branch';
 import { CVMComponentType } from '../shared/models/cvm-component-type';
 import { Result } from '../shared/models/enum';
 import { Filter } from '../shared/models/filter';
+import { UICVMComponent } from '../shared/models/ui-cvm-component';
+import { CommonActionsService } from '../shared/services/common-actions.service';
+import { CacheService } from '../shared/services/cache.service';
 
 @Injectable()
 export class CVMComponentsService {
@@ -14,7 +17,8 @@ export class CVMComponentsService {
   public component: CVMComponent[];
   public count: number;
 
-  constructor(private communicationManager: CommunicationManagerService, private logger: LoggerService) { }
+  constructor(private communicationManager: CommunicationManagerService, private logger: LoggerService,
+              private commonService: CommonActionsService, private cache: CacheService) { }
 
   /**
    * @async
@@ -29,6 +33,7 @@ export class CVMComponentsService {
         this.logger.error(new Error('couldnt get branches'));
         tBranchID = -1;
       }
+      this.cache.setBranches(this.branches);
 
       this.types = await this.communicationManager.getComponentTypes();
       if (!this.types || this.types.length <= 0) {
@@ -72,11 +77,19 @@ export class CVMComponentsService {
    * @param {number} pageNumber - in pagging page number
    * @param {string} orderBy - the column name and the direction of sorting
    * @param {Filter} filter - object that contains the text to search for and columns name to search in
-   * @returns {Promise<CVMComponent[]>} - array of objects of type CVMComponent wrapped in a promise.
+   * @returns {Promise<UICVMComponent[]>} - array of objects of type UICVMComponent wrapped in a promise.
    */
-  public async getDevices(pPageNumber: number, pColumnName: string, pBranchID: number, pType?: string, pFilter?: Filter): Promise<CVMComponent[]>  {
+  public async getDevices(pageNumber: number, columnName: string, branchID: number, type?: string, filter?: Filter): Promise<UICVMComponent[]>  {
     try {
-      return await this.communicationManager.getComponent(pBranchID, pType, null, pPageNumber, pColumnName, pFilter);
+      let tComponents: UICVMComponent[];
+      const tDevices = await this.communicationManager.getComponent(branchID, type, null, pageNumber, columnName, filter);
+      if (!!tDevices) {
+        tComponents = tDevices.map((pDvice) => {
+          return new UICVMComponent(pDvice.id, pDvice.typeName, pDvice.name_L1, pDvice.identity,
+                    pDvice.address, this.commonService.getBranch(pDvice.queueBranch_ID).name);
+        });
+      }
+      return tComponents;
     } catch (error) {
       this.logger.error(error);
       return null;

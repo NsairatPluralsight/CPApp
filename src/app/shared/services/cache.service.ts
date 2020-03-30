@@ -5,6 +5,7 @@ import { LoggerService } from './logger.service';
 import { SessionStorageService } from './session-storage.service';
 import { Constants } from '../models/constants';
 import { Permission } from '../models/permission';
+import { Branch } from '../models/branch';
 import { AuthenticatedUser } from '../models/authenticated-User';
 
 @Injectable({ providedIn: 'root' })
@@ -150,6 +151,22 @@ export class CacheService {
   public getIsDiffrentUser(): boolean {
     try {
       return this.sessionService.getData(`${Constants.cSESSION_PREFIX}${Constants.cIS_DIFFRENT_USER}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public setBranches(pBranches: Branch[]): void {
+    try {
+      this.cache.branches = pBranches;
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public getBranches(): Branch[] {
+    try {
+      return this.cache.branches;
     } catch (error) {
       this.logger.error(error);
     }

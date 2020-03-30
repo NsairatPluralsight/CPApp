@@ -229,6 +229,12 @@ describe('CommunicationManagerService', () => {
       authUser.token = 'test';
       return authUser;
     },
+    getBranches() {
+      return new Array<Branch>();
+    },
+    setBranches(pBranches) {
+      const branches = pBranches;
+    },
   };
 
   beforeEach(() => {

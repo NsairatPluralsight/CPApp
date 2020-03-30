@@ -8,6 +8,7 @@ import { CommunicationManagerService } from './communication-manager.service';
 import { CacheService } from './cache.service';
 import { CommunicationService } from './communication.service';
 import { Permission } from '../models/permission';
+import { Branch } from '../models/branch';
 
 describe('CommonActionsService', () => {
   let service: CommonActionsService;
@@ -107,4 +108,31 @@ describe('CommonActionsService', () => {
       expect(getPermissionSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('getBranch', () => {
+    it('should return branch', async () => {
+      const getBranchesSpy = spyOn(CacheService.prototype, 'getBranches').and.callFake(() => {
+        const branches = new Array<Branch>();
+        branches.push(new Branch(1, 'test'));
+        return branches;
+      });
+
+      const branch = await service.getBranch(1);
+
+      expect(branch.id).toBe(1);
+      expect(getBranchesSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return undefined', async () => {
+      const getBranchesSpy = spyOn(CacheService.prototype, 'getBranches').and.callFake(() => {
+        return  new Array<Branch>();
+      });
+
+      const branch = await service.getBranch(15);
+
+      expect(branch).toBe(undefined);
+      expect(getBranchesSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
 });

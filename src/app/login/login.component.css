@@ -15,15 +15,15 @@ mat-form-field {
   margin: 10px;
 }
 
-.form-container{
-  margin-top: 0;
-}
-
-.language-section{
+.form-container {
   margin-bottom: 0;
 }
 
-.login-container{
+.language-section {
+  margin-top: 0;
+}
+
+.login-container {
   margin: auto;
   width: 400px;
 }

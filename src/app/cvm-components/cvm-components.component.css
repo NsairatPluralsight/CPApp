@@ -70,5 +70,6 @@ table {
 }
 
 .table-cell {
-  width: 425px;
+  max-width: 500px;
+  padding: 1px;
 }

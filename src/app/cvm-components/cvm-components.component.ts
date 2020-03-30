@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild, ChangeDetectorRef, OnDestroy } from '@ang
 import { MatTableDataSource, MatPaginator, MatSort, MatPaginatorIntl, PageEvent, MatDialog } from '@angular/material';
 import { LoggerService } from '../shared/services/logger.service';
 import { MultilingualService } from '../shared/services/multilingual.service';
-import { CVMComponent } from '../shared/models/cvm-component';
 import { Branch } from '../shared/models/branch';
 import { CVMComponentsService } from './cvm-components.service';
 import { Result, Error, PermissionType, InternalStatus } from '../shared/models/enum';
@@ -17,6 +16,7 @@ import { DialogComponent } from '../shared/components/dialog.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonActionsService } from '../shared/services/common-actions.service';
 import { CacheService } from '../shared/services/cache.service';
+import { UICVMComponent } from '../shared/models/ui-cvm-component';
 
 @Component({
   selector: 'app-cvm-components',
@@ -24,7 +24,7 @@ import { CacheService } from '../shared/services/cache.service';
   styleUrls: ['./cvm-components.component.css'],
 })
 export class CVMComponentsComponent implements OnInit, OnDestroy {
-  public displayedColumns = [Constants.cNAME, Constants.cADDRESS, 'Branch', Constants.cTYPE, Constants.cIDENTITY];
+  public displayedColumns = [Constants.cNAME, Constants.cADDRESS, Constants.cBRANCH, Constants.cTYPE, Constants.cIDENTITY];
   public branches: Branch[];
   public types: CVMComponentType[];
   public count: number;
@@ -40,7 +40,7 @@ export class CVMComponentsComponent implements OnInit, OnDestroy {
   public branchesDisabled: string;
   public typeCaption: string;
   public devicesForm: FormGroup;
-  public dataSource: MatTableDataSource<CVMComponent>;
+  public dataSource: MatTableDataSource<UICVMComponent>;
   @ViewChild(MatSort, {static: false}) public sort: MatSort;
   @ViewChild(MatPaginator, {static: false}) public paginator: MatPaginator;
   public pageEvent: PageEvent;
@@ -102,11 +102,8 @@ export class CVMComponentsComponent implements OnInit, OnDestroy {
       const tPageIndex = this.paginator ? this.paginator.pageIndex : 0;
       const tColumnName = this.getColumnName();
 
-      this.componentsService.getDevices(tPageIndex, tColumnName, tBranchID, tType, this.filter).then((devices: CVMComponent[]) => {
+      this.componentsService.getDevices(tPageIndex, tColumnName, tBranchID, tType, this.filter).then((devices: UICVMComponent[]) => {
         if (devices) {
-          devices.map((device) => {
-            device.branch = this.branches.find((branche) => branche.id === device.queueBranch_ID).name;
-          });
           this.dataSource = new MatTableDataSource(devices);
           this.showTable = true;
       }

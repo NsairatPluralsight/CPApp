@@ -10,6 +10,7 @@ body { margin: 0; font-family: Lato-Regular, "Helvetica Neue", sans-serif; }
 
 .mat-menu-panel {
     width: 250px;
+    min-height: 55px !important;
 }
 
 tr > th {

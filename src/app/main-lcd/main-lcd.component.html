@@ -11,26 +11,28 @@
           </mat-card-header>
           <mat-card-content>
             <section *ngIf='mainLCD'>
-              <div class="label-group-container">
-                <div class="label-container"><mat-label class="header-label">{{name}}</mat-label></div>
-                <div class="label-container"><mat-label>{{mainLCDService.mainLCD['name_L'+ languageIndex ]}}</mat-label></div>
-              </div>
-              <div class="label-group-container">
-                <div class="label-container"><mat-label class="header-label">{{branchCaption}}</mat-label></div>
-                <div class="label-container"><mat-label>{{branchName}}</mat-label></div>
-              </div>
-              <div class="label-group-container">
-                <div class="label-container"><mat-label class="header-label">{{ipAddress}}</mat-label></div>
-                <div class="label-container"><mat-label>{{mainLCDService.mainLCD.address}}</mat-label></div>
-              </div>
-              <div class="label-group-container">
-                <div class="label-container"><mat-label class="header-label">{{typeCaption}}</mat-label></div>
-                <div class="label-container"><mat-label>{{mainLCDService.mainLCD.typeName}}</mat-label></div>
-              </div>
-              <div class="label-group-container">
-                <div class="label-container"><mat-label class="header-label">{{identity}}</mat-label></div>
-                <div class="label-container"><mat-label>{{mainLCDService.mainLCD.identity}}</mat-label></div>
-              </div>
+              <section class="align-secion">
+                <div class="label-group-container">
+                  <div class="label-container"><mat-label class="header-label">{{name}}</mat-label></div>
+                  <div class="value-label-container" [title]='mainLCD.name'><mat-label>{{mainLCD.name}}</mat-label></div>
+                </div>
+                <div class="label-group-container">
+                  <div class="label-container"><mat-label class="header-label">{{branchCaption}}</mat-label></div>
+                  <div class="value-label-container" [title]='mainLCD.branch'><mat-label>{{mainLCD.branch}}</mat-label></div>
+                </div>
+                <div class="label-group-container">
+                  <div class="label-container"><mat-label class="header-label">{{ipAddress}}</mat-label></div>
+                  <div class="value-label-container" [title]='mainLCD.address'><mat-label>{{mainLCD.address}}</mat-label></div>
+                </div>
+                <div class="label-group-container">
+                  <div class="label-container"><mat-label class="header-label">{{typeCaption}}</mat-label></div>
+                  <div class="value-label-container" [title]='mainLCD.typeName'><mat-label>{{mainLCD.typeName}}</mat-label></div>
+                </div>
+                <div class="label-group-container">
+                  <div class="label-container"><mat-label class="header-label">{{identity}}</mat-label></div>
+                  <div class="value-label-container" [title]='mainLCD.identity'><mat-label>{{mainLCD.identity}}</mat-label></div>
+                </div>
+              </section>
             </section>
           </mat-card-content>
         </mat-card>

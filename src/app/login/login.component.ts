@@ -202,6 +202,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     try {
       await this.languageService.loadLanguage(id);
       this.languages = this.languageService.languages;
+      // this.languageDirection = this.languageService.
       this.loadCaptions();
     } catch (error) {
       this.logger.error(error);

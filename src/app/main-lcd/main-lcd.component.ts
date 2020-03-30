@@ -19,6 +19,7 @@ import { Constants } from '../shared/models/constants';
 import { CommonActionsService } from '../shared/services/common-actions.service';
 import { CacheService } from '../shared/services/cache.service';
 import { CVMComponent } from '../shared/models/cvm-component';
+import { UICVMComponent } from '../shared/models/ui-cvm-component';
 
 @Component({
   selector: 'app-main-lcd',
@@ -33,7 +34,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   public dataSourceService: MatTableDataSource<Service>;
   public enablePaging: boolean;
   public mainLCDForm: FormGroup;
-  public mainLCD: CVMComponent;
+  public mainLCD: UICVMComponent;
   public mainLCDConfiguration: MainLCDConfiguration;
   public mainLCDID: number;
   public name: string;
@@ -63,7 +64,6 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   public identity: string;
   public ipAddress: string;
   public typeCaption: string;
-  public branchName: string;
   public generalInfoCaption: string;
   public branchCaption: string;
   @ViewChildren(MatSort) public sorts: MatSort;
@@ -92,7 +92,7 @@ export class MainLCDComponent implements OnInit, OnDestroy {
       this.route.params.subscribe(async (params) => {
         if (params && (params.pid || params.PID)) {
           this.mainLCDID = params.pid ? params.pid : params.PID;
-          const tResult = await this.mainLCDService.getSettings(this.mainLCDID);
+          const tResult = await this.mainLCDService.getSettings(this.mainLCDID, this.languageIndex);
           if (tResult === Result.Success) {
             this.intilizeSettings();
           }
@@ -110,11 +110,10 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   public intilizeSettings(): void {
     try {
       this.mainLCDConfiguration = this.mainLCDService.mainLCDConfiguration;
-      this.mainLCD = this.mainLCDService.mainLCD;
+      this.mainLCD = this.mainLCDService.mainLCDUI;
       this.enablePaging = this.mainLCDConfiguration.enablePaging;
       this.dataSource = new MatTableDataSource(this.mainLCDConfiguration.counters);
       this.dataSourceService = new MatTableDataSource(this.mainLCDConfiguration.services);
-      this.branchName = this.mainLCDService.branch.name;
       this.fillFormGroup();
       this.listenToFormValueChanges();
 

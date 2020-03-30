@@ -4,6 +4,7 @@ import { LoggerService } from './logger.service';
 import { SessionStorageService } from './session-storage.service';
 import { Language } from '../models/language';
 import { AuthenticatedUser } from '../models/authenticated-User';
+import { Branch } from '../models/branch';
 
 describe('CacheService', () => {
   let service: CacheService;
@@ -94,6 +95,24 @@ describe('CacheService', () => {
       service.getCurrentLanguage();
 
       expect(getDataSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getBranches', () => {
+    it('Branches should be null', () => {
+      service.setBranches(null);
+
+      const branches = service.getBranches();
+
+      expect(branches).toBe(null);
+    });
+
+    it('languages should not be null', () => {
+      service.setBranches(new Array<Branch>());
+
+      const branches = service.getBranches();
+
+      expect(branches).not.toBe(null);
     });
   });
 });

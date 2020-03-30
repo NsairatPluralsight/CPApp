@@ -95,7 +95,7 @@ mat-form-field, mat-radio-button {
 }
 
 .label-container  {
-  width: 70px;
+  width: 200px;
 }
 
 .submitButton {
@@ -104,4 +104,15 @@ mat-form-field, mat-radio-button {
 
 [dir="rtl"] .submitButton {
   text-align: left;
+}
+
+.value-label-container {
+  max-width: calc(100% - 210px);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.align-secion {
+  margin: 5px;
 }

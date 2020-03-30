@@ -5,6 +5,7 @@ import { LoginErrorCodes, Error, PermissionType } from '../models/enum';
 import { Constants } from '../models/constants';
 import { CommunicationManagerService } from './communication-manager.service';
 import { CacheService } from './cache.service';
+import { Branch } from '../models/branch';
 
 @Injectable({
   providedIn: 'root',
@@ -106,6 +107,20 @@ export class CommonActionsService {
     } catch (error) {
       this.logger.error(error);
       return false;
+    }
+  }
+
+  /**
+   * @summary - get one branch from the cahced list of branches
+   * @param pBranchID - the id of branch to get from cache
+   * @returns {Branch} - the Branch
+   */
+  public getBranch(pBranchID: number): Branch {
+    try {
+      const branches = this.cache.getBranches();
+      return branches.find((pBranch) => pBranch.id === pBranchID);
+    } catch (error) {
+      this.logger.error(error);
     }
   }
 }

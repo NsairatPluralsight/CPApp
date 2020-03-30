@@ -7,6 +7,9 @@ import { Result } from '../shared/models/enum';
 import { Branch } from '../shared/models/branch';
 import { CVMComponentType } from '../shared/models/cvm-component-type';
 import { CVMComponent } from '../shared/models/cvm-component';
+import { CommonActionsService } from '../shared/services/common-actions.service';
+import { MultilingualService } from '../shared/services/multilingual.service';
+import { CacheService } from '../shared/services/cache.service';
 
 describe('CVMComponentsService', () => {
   let service: CVMComponentsService;
@@ -21,6 +24,10 @@ describe('CVMComponentsService', () => {
         CommunicationManagerService,
         { provide: CommunicationService, useValue: mockCommunicationService},
         { provide: LoggerService, useValue: mockLoggerservice },
+        CommonActionsService,
+        MultilingualService,
+        CacheService,
+        MultilingualService,
       ],
      });
     service = TestBed.get(CVMComponentsService);
@@ -115,12 +122,13 @@ describe('CVMComponentsService', () => {
   });
 
   describe('getDevices',  () => {
-    it('should return null', async () => {
+
+    it('should return undefined', async () => {
       const getComponentSpy = spyOn(CommunicationManagerService.prototype, 'getComponent').and.callFake(() => null);
 
       const result = await service.getDevices(1, 'ID', 115);
 
-      expect(result).toBe(null);
+      expect(result).toBe(undefined);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -129,6 +137,7 @@ describe('CVMComponentsService', () => {
       components.push(new CVMComponent());
 
       const getComponentSpy = spyOn(CommunicationManagerService.prototype, 'getComponent').and.callFake(() => components);
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch').and.callFake(() => new Branch(115, 'test'));
 
       const result = await service.getDevices(1, 'ID', 115);
 

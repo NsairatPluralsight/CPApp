@@ -6,17 +6,6 @@
     </mat-card-subtitle>
 
     <mat-card-content>
-      <section [hidden]='!showLanguage' class="language-section">
-        <mat-form-field>
-          <mat-select [(value)]="selectedLanguageID" (valueChange)="languageChange($event)">
-            <mat-option *ngFor="let language of languages" [value]="language.id">{{ language.caption }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <section [hidden]='showLoginForm'>
-          <button id="btnContinue" mat-raised-button color='primary' (click)="goToMainPage()">{{continue}}</button>
-        </section>
-      </section>
       <form [formGroup]='loginForm' (ngSubmit)="login()" [hidden]='!showLoginForm'>
         <section class='form-container'>
           <mat-form-field>
@@ -26,6 +15,17 @@
             <input id="txtPassword" matInput formControlName='password' type="password"
               placeholder='{{passwordCaption}}'>
           </mat-form-field>
+        </section>
+        <section [hidden]='!showLanguage' class="language-section">
+          <mat-form-field>
+            <mat-select [(value)]="selectedLanguageID" (valueChange)="languageChange($event)">
+              <mat-option *ngFor="let language of languages" [value]="language.id">{{ language.caption }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+  
+          <section [hidden]='showLoginForm'>
+            <button id="btnContinue" mat-raised-button color='primary' (click)="goToMainPage()">{{continue}}</button>
+          </section>
         </section>
         <section class="login-button-container">
           <button id="btnLogin" [disabled]='!loginForm.valid' mat-raised-button

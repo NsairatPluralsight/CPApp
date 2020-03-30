@@ -9,6 +9,8 @@ import { CVMComponent } from 'src/app/shared/models/cvm-component';
 import { Counter } from 'src/app/shared/models/counter';
 import { Service } from 'src/app/shared/models/service';
 import { Branch } from 'src/app/shared/models/branch';
+import { CommonActionsService } from 'src/app/shared/services/common-actions.service';
+import { MultilingualService } from 'src/app/shared/services/multilingual.service';
 
 describe('MainLCDService', () => {
   let service: MainLCDService;
@@ -22,6 +24,8 @@ describe('MainLCDService', () => {
         CommunicationManagerService,
         { provide: CommunicationService, useValue: mockCommunicationService},
         { provide: LoggerService, useValue: mockLoggerservice },
+        CommonActionsService,
+        MultilingualService,
       ],
     });
     service = TestBed.get(MainLCDService);
@@ -38,11 +42,13 @@ describe('MainLCDService', () => {
       const getServicesIDsSpy = spyOn(CommunicationManagerService.prototype, 'getServicesIDs');
       const getServicesSpy = spyOn(CommunicationManagerService.prototype, 'getServices');
       const prepareConfigurationSpy = spyOn(service, 'prepareConfiguration');
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch');
 
-      const result = await service.getSettings(1);
+      const result = await service.getSettings(1, '1');
 
       expect(result).toBe(Result.Failed);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
+      expect(getBranchSpy).toHaveBeenCalledTimes(0);
       expect(getCountersSpy).toHaveBeenCalledTimes(0);
       expect(getServicesIDsSpy).toHaveBeenCalledTimes(0);
       expect(getServicesSpy).toHaveBeenCalledTimes(0);
@@ -57,11 +63,13 @@ describe('MainLCDService', () => {
       const getServicesIDsSpy = spyOn(CommunicationManagerService.prototype, 'getServicesIDs');
       const getServicesSpy = spyOn(CommunicationManagerService.prototype, 'getServices');
       const prepareConfigurationSpy = spyOn(service, 'prepareConfiguration');
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch').and.callFake(() => new Branch(115, 'test'));
 
-      const result = await service.getSettings(1);
+      const result = await service.getSettings(1, '1');
 
       expect(result).toBe(Result.Failed);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
+      expect(getBranchSpy).toHaveBeenCalledTimes(1);
       expect(getCountersSpy).toHaveBeenCalledTimes(1);
       expect(getServicesIDsSpy).toHaveBeenCalledTimes(0);
       expect(getServicesSpy).toHaveBeenCalledTimes(0);
@@ -78,11 +86,13 @@ describe('MainLCDService', () => {
       const getServicesIDsSpy = spyOn(CommunicationManagerService.prototype, 'getServicesIDs').and.callFake(() => null);
       const getServicesSpy = spyOn(CommunicationManagerService.prototype, 'getServices');
       const prepareConfigurationSpy = spyOn(service, 'prepareConfiguration');
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch').and.callFake(() => new Branch(115, 'test'));
 
-      const result = await service.getSettings(1);
+      const result = await service.getSettings(1, '1');
 
       expect(result).toBe(Result.Failed);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
+      expect(getBranchSpy).toHaveBeenCalledTimes(1);
       expect(getCountersSpy).toHaveBeenCalledTimes(1);
       expect(getServicesIDsSpy).toHaveBeenCalledTimes(1);
       expect(getServicesSpy).toHaveBeenCalledTimes(0);
@@ -99,11 +109,13 @@ describe('MainLCDService', () => {
       const getServicesIDsSpy = spyOn(CommunicationManagerService.prototype, 'getServicesIDs').and.callFake(() => [1, 3, 5]);
       const getServicesSpy = spyOn(CommunicationManagerService.prototype, 'getServices').and.callFake(() => null);
       const prepareConfigurationSpy = spyOn(service, 'prepareConfiguration');
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch').and.callFake(() => new Branch(115, 'test'));
 
-      const result = await service.getSettings(1);
+      const result = await service.getSettings(1, '1');
 
       expect(result).toBe(Result.Failed);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
+      expect(getBranchSpy).toHaveBeenCalledTimes(1);
       expect(getCountersSpy).toHaveBeenCalledTimes(1);
       expect(getServicesIDsSpy).toHaveBeenCalledTimes(1);
       expect(getServicesSpy).toHaveBeenCalledTimes(1);
@@ -122,11 +134,13 @@ describe('MainLCDService', () => {
       const getServicesIDsSpy = spyOn(CommunicationManagerService.prototype, 'getServicesIDs').and.callFake(() => [1, 3, 5]);
       const getServicesSpy = spyOn(CommunicationManagerService.prototype, 'getServices').and.callFake(() => services);
       const prepareConfigurationSpy = spyOn(service, 'prepareConfiguration').and.callFake(() => Result.Failed);
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch').and.callFake(() => new Branch(115, 'test'));
 
-      const result = await service.getSettings(1);
+      const result = await service.getSettings(1, '1');
 
       expect(result).toBe(Result.Failed);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
+      expect(getBranchSpy).toHaveBeenCalledTimes(1);
       expect(getCountersSpy).toHaveBeenCalledTimes(1);
       expect(getServicesIDsSpy).toHaveBeenCalledTimes(1);
       expect(getServicesSpy).toHaveBeenCalledTimes(1);
@@ -140,16 +154,19 @@ describe('MainLCDService', () => {
       counters.push(new Counter(1, '2', 0, false, 'test', 'test', 'test', 'test'));
       const services = new Array<Service>();
       services.push(new Service(1, 'test', false));
+
       const getComponentSpy = spyOn(CommunicationManagerService.prototype, 'getComponent').and.callFake(() => array);
       const getCountersSpy = spyOn(CommunicationManagerService.prototype, 'getCounters').and.callFake(() => counters);
       const getServicesIDsSpy = spyOn(CommunicationManagerService.prototype, 'getServicesIDs').and.callFake(() => [1, 3, 5]);
       const getServicesSpy = spyOn(CommunicationManagerService.prototype, 'getServices').and.callFake(() => services);
       const prepareConfigurationSpy = spyOn(service, 'prepareConfiguration').and.callFake(() => Result.Success);
+      const getBranchSpy = spyOn(CommonActionsService.prototype, 'getBranch').and.callFake(() => new Branch(115, 'test'));
 
-      const result = await service.getSettings(1);
+      const result = await service.getSettings(1, '1');
 
       expect(result).toBe(Result.Success);
       expect(getComponentSpy).toHaveBeenCalledTimes(1);
+      expect(getBranchSpy).toHaveBeenCalledTimes(1);
       expect(getCountersSpy).toHaveBeenCalledTimes(1);
       expect(getServicesIDsSpy).toHaveBeenCalledTimes(1);
       expect(getServicesSpy).toHaveBeenCalledTimes(1);
@@ -224,28 +241,6 @@ describe('MainLCDService', () => {
 
       expect(result).not.toBe(null);
       expect(typeof(result.services)).toBe('object');
-    });
-  });
-
-  describe('setBranch', () => {
-    it('should set branch', async () => {
-      const branches = new Array<Branch>();
-      branches.push(new Branch(1, 'B1'));
-      const getBranchesSpy = spyOn(CommunicationManagerService.prototype, 'getBranches').and.callFake(() => branches);
-
-      await service.setBranch(1);
-
-      expect(service.branch.id).toEqual(1);
-    });
-
-    it('should branch be undefined', async () => {
-      const branches = new Array<Branch>();
-      branches.push(new Branch(1, 'B1'));
-      const getBranchesSpy = spyOn(CommunicationManagerService.prototype, 'getBranches').and.callFake(() => branches);
-
-      await service.setBranch(2);
-
-      expect(service.branch).toBeUndefined();
     });
   });
 });

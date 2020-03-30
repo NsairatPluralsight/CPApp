@@ -7,7 +7,8 @@ import { CVMComponent } from 'src/app/shared/models/cvm-component';
 import { MainLCDConfiguration } from 'src/app/shared/models/main-lcd-configuration';
 import { Service } from 'src/app/shared/models/service';
 import { Constants } from 'src/app/shared/models/constants';
-import { Branch } from 'src/app/shared/models/branch';
+import { UICVMComponent } from 'src/app/shared/models/ui-cvm-component';
+import { CommonActionsService } from 'src/app/shared/services/common-actions.service';
 import { MainLCDCounter } from 'src/app/shared/models/main-lcd-counter';
 
 @Injectable()
@@ -15,11 +16,12 @@ export class MainLCDService {
   public counters: Counter[];
   public services: Service[];
   public mainLCD: CVMComponent;
+  public mainLCDUI: UICVMComponent;
   public mainLCDConfiguration: MainLCDConfiguration;
-  public branch: Branch;
   public idleTimeForPaging = 30;
   public pageDuration = 10;
-  constructor(private communicationManager: CommunicationManagerService, private logger: LoggerService) { }
+  constructor(private communicationManager: CommunicationManagerService, private logger: LoggerService,
+              private commonService: CommonActionsService) { }
 
   /**
    * @async
@@ -27,11 +29,15 @@ export class MainLCDService {
    * @param {number} mainLCDID - the ID of the component
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
-  public async getSettings(pMainLCDID: number): Promise<Result> {
+  public async getSettings(pMainLCDID: number, pLanguageIndex: string): Promise<Result> {
     try {
       this.mainLCD = (await this.communicationManager.getComponent(0, Constants.cMAIN_LCD, pMainLCDID))[0];
 
       if (this.mainLCD) {
+
+        this.mainLCDUI = new UICVMComponent(this.mainLCD.id, this.mainLCD.typeName, this.mainLCD['name_L' + pLanguageIndex],
+        this.mainLCD.identity, this.mainLCD.address, this.commonService.getBranch(this.mainLCD.queueBranch_ID).name);
+
         this.counters = await this.communicationManager.getCounters(this.mainLCD.queueBranch_ID);
 
         if (this.counters && this.counters.length > 0) {
@@ -135,8 +141,6 @@ export class MainLCDService {
         });
       }
       this.mainLCDConfiguration.services = this.services;
-      await this.setBranch(this.mainLCD.queueBranch_ID);
-
       return Result.Success;
     } catch (error) {
       this.logger.error(error);
@@ -158,19 +162,11 @@ export class MainLCDService {
       if (pConfiguration.services.length > 0) {
         pConfiguration.services = pConfiguration.services.map((service) => service.id );
       }
+
       return pConfiguration;
     } catch (error) {
       this.logger.error(error);
       return null;
-    }
-  }
-
-  public async setBranch(pBranchID: number): Promise<void>  {
-    try {
-      const tBranches = await this.communicationManager.getBranches();
-      this.branch = tBranches.find((pBranch) => pBranch.id === pBranchID);
-    } catch (error) {
-      this.logger.error(error);
     }
   }
 }
