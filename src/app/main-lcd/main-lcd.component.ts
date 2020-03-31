@@ -142,7 +142,6 @@ export class MainLCDComponent implements OnInit, OnDestroy {
         } else {
           this.mainLCDConfiguration.counters = this.dataSource.data.filter((c) => c.assigned === true);
         }
-
         this.mainLCDConfiguration.displayMode = this.mainLCDForm.get(Constants.cPLAYER_MODE).value;
 
         if (this.mainLCDConfiguration.displayMode === MainLCDDisplayMode.WithWaiting) {
