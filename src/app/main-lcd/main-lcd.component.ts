@@ -137,23 +137,18 @@ export class MainLCDComponent implements OnInit, OnDestroy {
         let isValid = true;
         this.mainLCDConfiguration.countersOption = this.mainLCDForm.get(Constants.cCOUNTERS_VALUE).value;
 
-        if (this.mainLCDConfiguration.countersOption === CountersOption.All) {
-          this.mainLCDConfiguration.counters = [];
-        } else {
-          this.mainLCDConfiguration.counters = this.dataSource.data.filter((c) => c.assigned === true);
-        }
+        this.mainLCDConfiguration.countersOption === CountersOption.All ? this.mainLCDConfiguration.counters = [] :
+        this.mainLCDConfiguration.counters = this.dataSource.data.filter((c) => c.assigned === true);
+
         this.mainLCDConfiguration.displayMode = this.mainLCDForm.get(Constants.cPLAYER_MODE).value;
 
         if (this.mainLCDConfiguration.displayMode === MainLCDDisplayMode.WithWaiting) {
           this.mainLCDConfiguration.enablePaging = false;
-
           this.mainLCDConfiguration.allServicesSelected = this.mainLCDForm.get(Constants.cSERVICES_VALUE).value;
 
-          if (this.mainLCDConfiguration.allServicesSelected) {
-            this.mainLCDConfiguration.services = [];
-          } else {
-            this.mainLCDConfiguration.services = this.dataSourceService.data.filter((c) => c.assigned === true);
-          }
+          this.mainLCDConfiguration.allServicesSelected ?  this.mainLCDConfiguration.services = [] :
+          this.mainLCDConfiguration.services = this.dataSourceService.data.filter((c) => c.assigned === true);
+
         } else {
           this.mainLCDConfiguration.services = [];
           this.mainLCDConfiguration.enablePaging = this.enablePaging;
