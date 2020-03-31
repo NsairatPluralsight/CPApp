@@ -30,6 +30,7 @@ export class MainLCDService {
    * @returns {Promise<Result>} - Result wrapped in a promise.
    */
   public async getSettings(pMainLCDID: number, pLanguageIndex: string): Promise<Result> {
+    let tResult =  Result.Failed;
     try {
       this.mainLCD = (await this.communicationManager.getComponent(0, Constants.cMAIN_LCD, pMainLCDID))[0];
 
@@ -47,25 +48,12 @@ export class MainLCDService {
             this.services = await this.communicationManager.getServices(tServicesIDs);
 
             if (this.services && this.services.length > 0) {
-              const tResult = await this.prepareConfiguration();
-
-              if (tResult === Result.Success) {
-                return Result.Success;
-              } else {
-                return Result.Failed;
-              }
-            } else {
-              return Result.Failed;
+              tResult = await this.prepareConfiguration();
             }
-          } else {
-            return Result.Failed;
           }
-        } else {
-          return Result.Failed;
         }
-      } else {
-        return Result.Failed;
       }
+      return tResult;
     } catch (error) {
       this.logger.error(error);
       return Result.Failed;
