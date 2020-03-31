@@ -188,8 +188,7 @@ export class CVMComponentsComponent implements OnInit, OnDestroy {
   public getColumnName(): string {
     try {
       let tColumnName = null;
-      if (this.sort) {
-        if (this.sort.active && this.sort.direction) {
+      if (this.sort && this.sort.active && this.sort.direction) {
           tColumnName = this.sort.active;
           switch (this.sort.active) {
             case Constants.cTYPE:
@@ -201,7 +200,6 @@ export class CVMComponentsComponent implements OnInit, OnDestroy {
           }
           tColumnName += '.' + this.sort.direction;
         }
-      }
       return tColumnName;
     } catch (error) {
       this.logger.error(error);
