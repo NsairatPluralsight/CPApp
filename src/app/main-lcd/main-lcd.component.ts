@@ -131,11 +131,10 @@ export class MainLCDComponent implements OnInit, OnDestroy {
    * @async
    * @summary - gets the form values and save it if valid
    */
-  public async saveSettings(): Promise<void> {
+  public async validateSettings(): Promise<void> {
     try {
       if (!this.mainLCDForm.invalid && !this.disabled) {
         let isValid = true;
-
         this.mainLCDConfiguration.countersOption = this.mainLCDForm.get(Constants.cCOUNTERS_VALUE).value;
 
         if (this.mainLCDConfiguration.countersOption === CountersOption.All) {
@@ -156,7 +155,6 @@ export class MainLCDComponent implements OnInit, OnDestroy {
           } else {
             this.mainLCDConfiguration.services = this.dataSourceService.data.filter((c) => c.assigned === true);
           }
-
         } else {
           this.mainLCDConfiguration.services = [];
           this.mainLCDConfiguration.enablePaging = this.enablePaging;
@@ -178,29 +176,36 @@ export class MainLCDComponent implements OnInit, OnDestroy {
             }
           }
         }
-        const tTitle = this.languageService.getCaption(Constants.cSAVE_CONFIGURATION);
-        let tSubTitle = this.languageService.getCaption(Constants.cWRONG_DATA);
-        let tMessage = this.languageService.getCaption(Constants.cCHECK_INPUT);
-        let tCancelText = this.languageService.getCaption(Constants.cCANCEL);
-        const tYesText = this.languageService.getCaption(Constants.cOK);
-        let tCallBack = null;
-        if (isValid) {
-          const result = await this.mainLCDService.setConfiguration(this.mainLCDID, this.mainLCDConfiguration);
-
-          if (result === Result.Success) {
-            tSubTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
-            tMessage = this.languageService.getCaption(Constants.cSAVE_SUCCESS_MESSAGE);
-            tCancelText = '';
-            tCallBack = this.afterSaveDialogClose;
-          } else {
-            tSubTitle = this.languageService.getCaption(Constants.cSAVE_FAILED);
-            tMessage = this.languageService.getCaption(Constants.cSAVE_FAILED_MESSAGE);
-            tCancelText = '';
-          }
-        }
-
-        this.openDialog(tTitle, tSubTitle, tMessage, tCancelText, tYesText, tCallBack);
+        await this.saveSettings(isValid);
       }
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public async saveSettings(pIsValid: boolean): Promise<void> {
+    try {
+      const tTitle = this.languageService.getCaption(Constants.cSAVE_CONFIGURATION);
+      let tSubTitle = this.languageService.getCaption(Constants.cWRONG_DATA);
+      let tMessage = this.languageService.getCaption(Constants.cCHECK_INPUT);
+      let tCancelText = this.languageService.getCaption(Constants.cCANCEL);
+      const tYesText = this.languageService.getCaption(Constants.cOK);
+      let tCallBack = null;
+      if (pIsValid) {
+        const result = await this.mainLCDService.setConfiguration(this.mainLCDID, this.mainLCDConfiguration);
+
+        if (result === Result.Success) {
+          tSubTitle = this.languageService.getCaption(Constants.cSAVE_SUCCESS);
+          tMessage = this.languageService.getCaption(Constants.cSAVE_SUCCESS_MESSAGE);
+          tCancelText = '';
+          tCallBack = this.afterSaveDialogClose;
+        } else {
+          tSubTitle = this.languageService.getCaption(Constants.cSAVE_FAILED);
+          tMessage = this.languageService.getCaption(Constants.cSAVE_FAILED_MESSAGE);
+          tCancelText = '';
+        }
+      }
+      this.openDialog(tTitle, tSubTitle, tMessage, tCancelText, tYesText, tCallBack);
     } catch (error) {
       this.logger.error(error);
     }
