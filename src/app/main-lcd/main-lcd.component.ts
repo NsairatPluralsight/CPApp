@@ -470,14 +470,12 @@ export class MainLCDComponent implements OnInit, OnDestroy {
 
   public handleUnAuthorizedAction(pEntityName: string): void {
     try {
-      if (pEntityName) {
-        if (pEntityName === Constants.cCOUNTER || pEntityName === Constants.cSERVICE) {
+        if (pEntityName &&  (pEntityName === Constants.cCOUNTER || pEntityName === Constants.cSERVICE)) {
           this.showError(Error.NotAllowed, pEntityName);
           this.disabled = true;
           this.mainLCDConfiguration = new MainLCDConfiguration(MainLCDDisplayMode.CurrentCustomer, false,
             false, this.mainLCDService.idleTimeForPaging, this.mainLCDService.pageDuration, CountersOption.All);
         }
-      }
     } catch (error) {
       this.logger.error(error);
     }
