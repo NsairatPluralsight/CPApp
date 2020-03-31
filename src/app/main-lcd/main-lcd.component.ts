@@ -437,25 +437,14 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   public listenToEvents(): void {
     try {
       this.subscription = this.eventService.statusUpdate.subscribe((state) => {
-        this.isReady = state === InternalStatus.Ready;
-        if (this.isReady) {
-          this.loadCaptions();
-          this.cdRef.detectChanges();
-        }
+        this.handleStatusUpdate(state);
       });
 
       const tLanguageChangedSub = this.eventService.languageChanged.subscribe(() => { this.loadCaptions(); this.cdRef.detectChanges(); });
       this.subscription.add(tLanguageChangedSub);
 
       const tUnAuthorizedActionSub = this.eventService.unAuthorizedAction.subscribe((entityName) => {
-        if (entityName) {
-          if (entityName === Constants.cCOUNTER || entityName === Constants.cSERVICE) {
-            this.showError(Error.NotAllowed, entityName);
-            this.disabled = true;
-            this.mainLCDConfiguration = new MainLCDConfiguration(MainLCDDisplayMode.CurrentCustomer, false,
-              false, this.mainLCDService.idleTimeForPaging, this.mainLCDService.pageDuration, CountersOption.All);
-          }
-        }
+        this.handleUnAuthorizedAction(entityName);
       });
       this.subscription.add(tUnAuthorizedActionSub);
 
@@ -474,6 +463,33 @@ export class MainLCDComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public handleUnAuthorizedAction(pEntityName: string): void {
+    try {
+      if (pEntityName) {
+        if (pEntityName === Constants.cCOUNTER || pEntityName === Constants.cSERVICE) {
+          this.showError(Error.NotAllowed, pEntityName);
+          this.disabled = true;
+          this.mainLCDConfiguration = new MainLCDConfiguration(MainLCDDisplayMode.CurrentCustomer, false,
+            false, this.mainLCDService.idleTimeForPaging, this.mainLCDService.pageDuration, CountersOption.All);
+        }
+      }
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public handleStatusUpdate(pState: InternalStatus): void {
+    try {
+      this.isReady = pState === InternalStatus.Ready;
+      if (this.isReady) {
+        this.loadCaptions();
+        this.cdRef.detectChanges();
+      }
     } catch (error) {
       this.logger.error(error);
     }

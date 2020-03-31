@@ -284,20 +284,11 @@ export class CVMComponentsComponent implements OnInit, OnDestroy {
   public listenToEvents() {
     try {
       this.subscription = this.eventService.statusUpdate.subscribe((state) => {
-        setTimeout(() => {
-          this.isReady = state === InternalStatus.Ready;
-          if (this.isReady) {
-            this.loadCaptions();
-            this.cdRef.detectChanges();
-          }
-        });
+        this.handleStatusUpdate(state);
       });
 
       const tLanguageChangedSub = this.eventService.languageChanged.subscribe(() => {
-        this.loadCaptions();
-        if (!this.cdRef[Constants.cDESTROYED]) {
-          this.cdRef.detectChanges();
-        }
+        this.handleLanguageChange();
       });
       this.subscription.add(tLanguageChangedSub);
 
@@ -330,6 +321,31 @@ export class CVMComponentsComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public handleStatusUpdate(pState: InternalStatus): void {
+    try {
+      setTimeout(() => {
+        this.isReady = pState === InternalStatus.Ready;
+        if (this.isReady) {
+          this.loadCaptions();
+          this.cdRef.detectChanges();
+        }
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public handleLanguageChange() {
+    try {
+      this.loadCaptions();
+      if (!this.cdRef[Constants.cDESTROYED]) {
+        this.cdRef.detectChanges();
+      }
     } catch (error) {
       this.logger.error(error);
     }

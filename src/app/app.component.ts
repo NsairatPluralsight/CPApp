@@ -92,9 +92,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.subscription.add(unAuthenticatedSub);
 
       const setUserSub = this.eventsService.setUser.subscribe((user) => {
-        const oldUserData = this.cacheService.getUser();
-        user[Constants.cPERMISSION] = oldUserData.permission;
-        this.cacheService.setUser(user);
+        this.handleSetUser(user);
       });
       this.subscription.add(setUserSub);
 
@@ -122,16 +120,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.subscription.add(disconnect);
 
       const envStatusChanged = this.eventsService.connectivityChanged.subscribe(() => {
-        const isConnected = this.connectivityService.isConnected();
-
-        if (isConnected) {
-          this.showConnecting = false;
-          this.stateService.setStatus(InternalStatus.Ready);
-          this.eventsService.reboot.emit();
-        } else {
-          this.showConnecting = true;
-          this.stateService.setStatus(InternalStatus.Connecting);
-        }
+        this.handleConnectivityChange();
       });
       this.subscription.add(envStatusChanged);
 
@@ -158,6 +147,33 @@ export class AppComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     try {
       this.subscription.unsubscribe();
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public handleConnectivityChange() {
+    try {
+      const isConnected = this.connectivityService.isConnected();
+
+      if (isConnected) {
+        this.showConnecting = false;
+        this.stateService.setStatus(InternalStatus.Ready);
+        this.eventsService.reboot.emit();
+      } else {
+        this.showConnecting = true;
+        this.stateService.setStatus(InternalStatus.Connecting);
+      }
+    } catch (error) {
+      this.logger.error(error);
+    }
+  }
+
+  public handleSetUser(pUser: any) {
+    try {
+      const oldUserData = this.cacheService.getUser();
+      pUser[Constants.cPERMISSION] = oldUserData.permission;
+      this.cacheService.setUser(pUser);
     } catch (error) {
       this.logger.error(error);
     }
